@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/common/colors.dart';
-import '../../../../core/common/custom_button.dart';
-import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
 import '../../data/models/post_model.dart';
-import '../blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../blocs/komunitas_post/komunitas_post_bloc.dart';
-import '../blocs/komunitas_report/komunitas_report_bloc.dart';
 import '../pages/detail_post_page.dart';
 import 'components/user_details.dart';
 
-class ReportedCommentCard extends StatefulWidget {
+class ReportedCommentCard extends StatelessWidget {
   final UserModel user;
   final CommentModel comment;
   final PostModel post;
@@ -31,16 +23,7 @@ class ReportedCommentCard extends StatefulWidget {
   });
 
   @override
-  State<ReportedCommentCard> createState() => _ReportedCommentCardState();
-}
-
-class _ReportedCommentCardState extends State<ReportedCommentCard> {
-  @override
   Widget build(BuildContext context) {
-    final commentBloc = context.read<KomunitasCommentBloc>();
-    final postBloc = context.read<KomunitasPostBloc>();
-    final reportBloc = context.read<KomunitasReportBloc>();
-
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -54,21 +37,21 @@ class _ReportedCommentCardState extends State<ReportedCommentCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           UserDetails(
-            name: widget.comment.idUser != null ? widget.comment.idUser!.name.toString() : 'Disoriza User',
-            profilePicture: widget.comment.idUser?.profilePicture,
-            date: widget.comment.date,
-            isAdmin: widget.comment.idUser?.isAdmin ?? false,
+            name: comment.idUser != null ? comment.idUser!.name.toString() : 'Disoriza User',
+            profilePicture: comment.idUser?.profilePicture,
+            date: comment.date,
+            isAdmin: comment.idUser?.isAdmin ?? false,
           ),
           const SizedBox(height: 8),
           Text(
-            widget.comment.content.toString(),
+            comment.content.toString(),
             style: mediumTS.copyWith(color: neutral90),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
               Text(
-                'Dilaporkan oleh ${widget.comment.reports?.length} orang',
+                'Dilaporkan oleh ${comment.reports?.length} orang',
                 style: mediumTS.copyWith(fontSize: 12, color: neutral80),
               ),
               const Padding(
@@ -76,17 +59,7 @@ class _ReportedCommentCardState extends State<ReportedCommentCard> {
                 child: CircleAvatar(radius: 2, backgroundColor: Color(0xFFD9D9D9)),
               ),
               GestureDetector(
-                onTap: () => Navigator.of(context).push(PageTransition(
-                  child: MultiBlocProvider(
-                    providers: [
-                      BlocProvider.value(value: commentBloc),
-                      BlocProvider.value(value: postBloc),
-                      BlocProvider.value(value: reportBloc),
-                    ],
-                    child: DetailPostPage(user: widget.user, post: widget.post),
-                  ),
-                  type: PageTransitionType.rightToLeft,
-                )),
+                onTap: () => Get.to(() => DetailPostPage(user: user, post: post)),
                 child: Text(
                   'Lihat di postingan',
                   style: mediumTS.copyWith(fontSize: 12, color: accentOrangeMain),
@@ -94,44 +67,6 @@ class _ReportedCommentCardState extends State<ReportedCommentCard> {
               )
             ],
           )
-        ],
-      ),
-    );
-  }
-
-  Future<void> handleDeleteComment(BuildContext context, KomunitasCommentBloc commentBloc) {
-    return showDialog(
-      context: context,
-      builder: (context) => CustomPopup(
-        icon: IconsaxPlusLinear.trash,
-        iconColor: dangerMain,
-        title: 'Ingin menghapus komentar ini?',
-        subtitle: 'Setelah dihapus, data tidak dapat diurungkan.',
-        actions: [
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
-                  onTap: () => commentBloc.add(KomunitasDeleteComment(
-                    postId: widget.comment.idPost.toString(),
-                    commentId: widget.comment.id.toString(),
-                  )),
-                  text: 'Ya, hapus',
-                ),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
-                  onTap: () => Navigator.of(context).pop(),
-                  text: 'Batal',
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );

@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
+import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../blocs/komunitas_search/komunitas_search_bloc.dart';
+import '../controllers/komunitas_search_controller.dart';
 import '../widgets/post_card.dart';
 
 class SearchPostPage extends StatefulWidget {
@@ -22,10 +23,13 @@ class SearchPostPage extends StatefulWidget {
 
 class _SearchPostPageState extends State<SearchPostPage> {
   final _searchController = TextEditingController();
+  final komunitasSearchController = Get.find<KomunitasSearchController>();
+  Timer? _debounce;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -40,9 +44,8 @@ class _SearchPostPageState extends State<SearchPostPage> {
           bottom: BorderSide(color: neutral30),
         ),
 
-        // Back Button
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Get.back(),
           icon: const Icon(IconsaxPlusLinear.arrow_left),
         ),
 
@@ -63,34 +66,33 @@ class _SearchPostPageState extends State<SearchPostPage> {
               prefixIcon: IconsaxPlusLinear.search_normal,
               prefixIconColor: neutral60,
               onChanged: (value) {
-                Timer(const Duration(seconds: 2), () {
-                  setState(() => context.read<KomunitasSearchBloc>().add(KomunitasSearchPost(search: value)));
+                _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  komunitasSearchController.searchPost(search: value);
                 });
               },
             ),
           ),
         ),
       ),
-      body: BlocBuilder<KomunitasSearchBloc, KomunitasSearchState>(
-        builder: (context, state) {
-          return ListView(
-            padding: const EdgeInsets.all(8),
-            children: state is KomunitasSearchLoading
-                ? [
-                    const PostLoadingCard(),
-                  ]
-                : state is KomunitasSearchLoaded
-                    ? state.postModels.isNotEmpty
-                        ? state.postModels.map((post) {
-                            return PostCard(user: widget.user, post: post);
-                          }).toList()
-                        : [
-                            const DiskusiEmptyState(),
-                          ]
-                    : [],
-          );
-        },
-      ),
+      body: Obx(() {
+        return ListView(
+          padding: const EdgeInsets.all(8),
+          children: komunitasSearchController.status.value == Status.loading
+              ? [
+                  const PostLoadingCard(),
+                ]
+              : komunitasSearchController.status.value == Status.success
+                  ? komunitasSearchController.searchResults.isNotEmpty
+                      ? komunitasSearchController.searchResults.map((post) {
+                          return PostCard(user: widget.user, post: post);
+                        }).toList()
+                      : [
+                          const DiskusiEmptyState(),
+                        ]
+                  : [],
+        );
+      }),
     );
   }
 }

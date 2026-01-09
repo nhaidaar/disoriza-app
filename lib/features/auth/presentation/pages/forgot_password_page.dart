@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
@@ -7,7 +7,8 @@ import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
-import '../blocs/auth_bloc.dart';
+import '../../../../core/enums/status.dart';
+import '../controllers/auth_controller.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -39,76 +40,78 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthPasswordReseted) handlePasswordReseted(context);
-      },
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const Icon(IconsaxPlusLinear.arrow_left),
+    final authController = Get.find<AuthController>();
+
+    return Scaffold(
+      appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () => Get.back(),
+          child: const Icon(IconsaxPlusLinear.arrow_left),
+        ),
+        backgroundColor: neutral10,
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            color: neutral10,
+            child: Column(
+              children: [
+                Text(
+                  'Reset password',
+                  style: mediumTS.copyWith(fontSize: 24, color: neutral100),
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  'Masukkan email anda untuk mendapatkan link reset password.',
+                  style: mediumTS.copyWith(color: neutral100.withValues(alpha: 0.6)),
+                  textAlign: TextAlign.center,
+                )
+              ],
             ),
-            backgroundColor: neutral10,
           ),
-          body: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                color: neutral10,
-                child: Column(
-                  children: [
-                    // Title
-                    Text(
-                      'Reset password',
-                      style: mediumTS.copyWith(fontSize: 24, color: neutral100),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Subtitle
-                    Text(
-                      'Masukkan email anda untuk mendapatkan link reset password.',
-                      style: mediumTS.copyWith(color: neutral100.withOpacity(0.6)),
-                      textAlign: TextAlign.center,
-                    )
-                  ],
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              children: [
+                const Text(
+                  'Email',
+                  style: mediumTS,
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  children: [
-                    // Email Field
-                    const Text(
-                      'Email',
-                      style: mediumTS,
-                    ),
-                    const SizedBox(height: 8),
-                    CustomFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      hint: 'Masukkan email anda',
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Submit button
-                    state is AuthLoading
-                        ? const CustomLoadingButton()
-                        : CustomButton(
-                            onTap: () => context.read<AuthBloc>().add(AuthResetPassword(email: _emailController.text)),
-                            disabled: isEmailEmpty,
-                            text: 'Konfirmasi',
-                          ),
-                  ],
+                const SizedBox(height: 8),
+                CustomFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  hint: 'Masukkan email anda',
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+
+                Obx(() {
+                  if (authController.status.value == Status.loading) {
+                    return const CustomLoadingButton();
+                  }
+
+                  if (authController.passwordReseted.value) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      authController.passwordReseted.value = false;
+                      handlePasswordReseted(context);
+                    });
+                  }
+
+                  return CustomButton(
+                    onTap: () => authController.resetPassword(email: _emailController.text),
+                    disabled: isEmailEmpty,
+                    text: 'Konfirmasi',
+                  );
+                }),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

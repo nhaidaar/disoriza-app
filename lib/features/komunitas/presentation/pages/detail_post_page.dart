@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
@@ -11,13 +11,14 @@ import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
+import '../../../../core/enums/status.dart';
 import '../../../../core/utils/snackbar.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
 import '../../data/models/post_model.dart';
-import '../blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../blocs/komunitas_post/komunitas_post_bloc.dart';
-import '../blocs/komunitas_report/komunitas_report_bloc.dart';
+import '../controllers/komunitas_comment_controller.dart';
+import '../controllers/komunitas_post_controller.dart';
+import '../controllers/komunitas_report_controller.dart';
 import '../widgets/comment_card.dart';
 import '../widgets/components/user_details.dart';
 import '../widgets/post_card.dart';
@@ -36,307 +37,312 @@ class DetailPostPage extends StatefulWidget {
 }
 
 class _DetailPostPageState extends State<DetailPostPage> {
-  final commentController = TextEditingController();
+  final commentTextController = TextEditingController();
+  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasCommentController = Get.find<KomunitasCommentController>();
+  final komunitasReportController = Get.find<KomunitasReportController>();
+
   bool isLiked = false;
   bool isLatest = false;
 
   @override
   void initState() {
     isLiked = (widget.post.likes ?? []).contains(widget.user.id);
-    fetchComments(context);
+    fetchComments();
     super.initState();
+
+    ever(komunitasPostController.postDeleted, (deleted) {
+      if (deleted) {
+        handlePostDeleted(context);
+        komunitasPostController.postDeleted.value = false;
+      }
+    });
+
+    ever(komunitasCommentController.status, (status) {
+      if (status == Status.success) {
+        refreshCommentsCount();
+      }
+    });
+
+    ever(komunitasCommentController.commentDeleted, (deleted) {
+      if (deleted) {
+        handleCommentDeleted(context);
+        komunitasCommentController.commentDeleted.value = false;
+      }
+    });
+
+    ever(komunitasReportController.postReported, (reported) {
+      if (reported) {
+        handlePostReported(context);
+        komunitasReportController.postReported.value = false;
+      }
+    });
+
+    ever(komunitasReportController.commentReported, (reported) {
+      if (reported) {
+        handleCommentReported(context);
+        komunitasReportController.commentReported.value = false;
+      }
+    });
   }
 
   @override
   void dispose() {
-    commentController.dispose();
+    commentTextController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final postBloc = context.read<KomunitasPostBloc>();
-    final reportBloc = context.read<KomunitasReportBloc>();
-
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<KomunitasPostBloc, KomunitasPostState>(
-          listener: (context, state) {
-            if (state is KomunitasPostDeleted) handlePostDeleted(context);
-          },
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: neutral10,
+        surfaceTintColor: neutral10,
+        shape: const Border(
+          bottom: BorderSide(color: neutral30),
         ),
-        BlocListener<KomunitasCommentBloc, KomunitasCommentState>(
-          listener: (context, state) {
-            if (state is KomunitasCommentLoaded) refreshCommentsCount(state);
 
-            if (state is KomunitasCommentDeleted) handleCommentDeleted(context);
-          },
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon: const Icon(IconsaxPlusLinear.arrow_left),
         ),
-        BlocListener<KomunitasReportBloc, KomunitasReportState>(
-          listener: (context, state) {
-            if (state is KomunitasReportPostReported) handlePostReported(context);
 
-            if (state is KomunitasReportCommentReported) handleCommentReported(context);
-          },
+        title: Text(
+          'Detail diskusi',
+          style: mediumTS.copyWith(fontSize: 16, color: neutral100),
         ),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: neutral10,
-          surfaceTintColor: neutral10,
-          shape: const Border(
-            bottom: BorderSide(color: neutral30),
-          ),
+        centerTitle: true,
 
-          // Back Button
-          leading: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(IconsaxPlusLinear.arrow_left),
-          ),
-
-          title: Text(
-            'Detail diskusi',
-            style: mediumTS.copyWith(fontSize: 16, color: neutral100),
-          ),
-          centerTitle: true,
-
-          actions: [
-            widget.post.author?.id == widget.user.id || widget.user.isAdmin
-                ? IconButton(
-                    onPressed: () => handleDeletePost(context, postBloc),
-                    icon: const Icon(IconsaxPlusLinear.trash, color: dangerMain),
-                  )
-                : IconButton(
-                    onPressed: () => handleReportPost(context, reportBloc),
-                    icon: const Icon(IconsaxPlusLinear.info_circle, color: neutral100),
+        actions: [
+          widget.post.author?.id == widget.user.id || widget.user.isAdmin
+              ? IconButton(
+                  onPressed: () => handleDeletePost(context),
+                  icon: const Icon(IconsaxPlusLinear.trash, color: dangerMain),
+                )
+              : IconButton(
+                  onPressed: () => handleReportPost(context),
+                  icon: const Icon(IconsaxPlusLinear.info_circle, color: neutral100),
+                ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () async => fetchComments(),
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(8),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: defaultSmoothRadius,
+                    border: Border.all(color: neutral30),
+                    color: neutral10,
                   ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async => fetchComments(context),
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: defaultSmoothRadius,
-                      border: Border.all(color: neutral30),
-                      color: neutral10,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        UserDetails(
-                          name: widget.post.author != null ? widget.post.author!.name.toString() : 'Disoriza User',
-                          isAdmin: widget.post.author?.isAdmin ?? false,
-                          profilePicture: widget.post.author?.profilePicture,
-                          date: widget.post.date,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      UserDetails(
+                        name: widget.post.author != null ? widget.post.author!.name.toString() : 'Disoriza User',
+                        isAdmin: widget.post.author?.isAdmin ?? false,
+                        profilePicture: widget.post.author?.profilePicture,
+                        date: widget.post.date,
 
-                          // Reports
-                          canViewReport: widget.user.isAdmin && (widget.post.reports ?? []).isNotEmpty,
-                          reports: widget.post.reports?.length,
-                        ),
+                        canViewReport: widget.user.isAdmin && (widget.post.reports ?? []).isNotEmpty,
+                        reports: widget.post.reports?.length,
+                      ),
 
-                        const SizedBox(height: 12),
+                      const SizedBox(height: 12),
 
-                        Text(
-                          widget.post.title.toString(),
-                          style: semiboldTS.copyWith(fontSize: 16, color: neutral100),
-                        ),
+                      Text(
+                        widget.post.title.toString(),
+                        style: semiboldTS.copyWith(fontSize: 16, color: neutral100),
+                      ),
 
-                        const SizedBox(height: 4),
+                      const SizedBox(height: 4),
 
-                        Text(
-                          widget.post.content.toString(),
-                          style: mediumTS.copyWith(color: neutral90),
-                        ),
+                      Text(
+                        widget.post.content.toString(),
+                        style: mediumTS.copyWith(color: neutral90),
+                      ),
 
-                        const SizedBox(height: 4),
+                      const SizedBox(height: 4),
 
-                        // Image (optional)
-                        if (widget.post.urlImage != null) ...[
-                          const SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: CachedNetworkImage(
-                              imageUrl: widget.post.urlImage.toString(),
-                            ),
+                      if (widget.post.urlImage != null) ...[
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.post.urlImage.toString(),
                           ),
-                        ],
-
-                        const SizedBox(height: 12),
-
-                        Row(
-                          children: [
-                            // Like
-                            GestureDetector(
-                              onTap: () => handleLikePost(context),
-                              child: Icon(
-                                isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
-                                color: isLiked ? dangerMain : neutral100,
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              (widget.post.likes ?? []).length.toString(),
-                              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
-                            ),
-
-                            const SizedBox(width: 16),
-
-                            // Comment
-                            const Icon(
-                              IconsaxPlusLinear.message_text_1,
-                              color: neutral100,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              (widget.post.comments ?? []).length.toString(),
-                              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        const Divider(thickness: 1, color: neutral30),
-
-                        // Komentar title and Filter
-                        Row(
-                          children: [
-                            Text(
-                              'Komentar',
-                              style: mediumTS.copyWith(fontSize: 16, color: neutral100),
-                            ),
-                            const Spacer(),
-                            CustomDropdown(
-                              items: const [
-                                MapEntry('Terpopuler', false),
-                                MapEntry('Terbaru', true),
-                              ],
-                              initialValue: const MapEntry('Terpopuler', false),
-                              onChanged: (filter) async {
-                                if (isLatest != filter.value) {
-                                  isLatest = !isLatest;
-                                  context.read<KomunitasCommentBloc>().add(KomunitasFetchComments(
-                                        postId: widget.post.id.toString(),
-                                        latest: isLatest,
-                                      ));
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        // List of Komentar
-                        BlocBuilder<KomunitasCommentBloc, KomunitasCommentState>(
-                          builder: (context, state) {
-                            if (state is KomunitasCommentLoading) {
-                              return const PostLoadingCard();
-                            } else if (state is KomunitasCommentLoaded) {
-                              return state.commentModels.isNotEmpty
-                                  ? Column(
-                                      children: state.commentModels.map((comment) {
-                                        return CommentCard(
-                                          user: widget.user,
-                                          comment: comment,
-                                        );
-                                      }).toList(),
-                                    )
-                                  : const Center(child: KomentarEmptyState());
-                            }
-                            return const Center(child: KomentarEmptyState());
-                          },
                         ),
                       ],
-                    ),
+
+                      const SizedBox(height: 12),
+
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () => handleLikePost(),
+                            child: Icon(
+                              isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
+                              color: isLiked ? dangerMain : neutral100,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            (widget.post.likes ?? []).length.toString(),
+                            style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                          ),
+
+                          const SizedBox(width: 16),
+
+                          const Icon(
+                            IconsaxPlusLinear.message_text_1,
+                            color: neutral100,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            (widget.post.comments ?? []).length.toString(),
+                            style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      const Divider(thickness: 1, color: neutral30),
+
+                      Row(
+                        children: [
+                          Text(
+                            'Komentar',
+                            style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+                          ),
+                          const Spacer(),
+                          CustomDropdown(
+                            items: const [
+                              MapEntry('Terpopuler', false),
+                              MapEntry('Terbaru', true),
+                            ],
+                            initialValue: const MapEntry('Terpopuler', false),
+                            onChanged: (filter) async {
+                              if (isLatest != filter.value) {
+                                isLatest = !isLatest;
+                                komunitasCommentController.fetchComments(
+                                  postId: widget.post.id.toString(),
+                                  latest: isLatest,
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Obx(() {
+                        if (komunitasCommentController.status.value == Status.loading) {
+                          return const PostLoadingCard();
+                        } else if (komunitasCommentController.status.value == Status.success) {
+                          return komunitasCommentController.comments.isNotEmpty
+                              ? Column(
+                                  children: komunitasCommentController.comments.map((comment) {
+                                    return CommentCard(
+                                      user: widget.user,
+                                      comment: comment,
+                                    );
+                                  }).toList(),
+                                )
+                              : const Center(child: KomentarEmptyState());
+                        }
+                        return const Center(child: KomentarEmptyState());
+                      }),
+                    ],
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(
-                  border: Border.symmetric(horizontal: BorderSide(color: neutral30)),
-                  color: neutral10,
-                ),
-                child: Stack(
-                  alignment: Alignment.centerRight,
-                  children: [
-                    CustomFormField(
-                      controller: commentController,
-                      backgroundColor: backgroundCanvas,
-                      hint: 'Berikan komentar',
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        if (commentController.text.isNotEmpty) {
-                          final comment = CommentModel(
-                            idPost: widget.post.id,
-                            idUser: UserModel(id: widget.user.id),
-                            content: commentController.text,
-                          );
-
-                          context.read<KomunitasCommentBloc>().add(KomunitasCreateComment(comment: comment));
-                          commentController.clear();
-                        }
-                      },
-                      icon: const Icon(IconsaxPlusLinear.send_1),
-                    ),
-                  ],
-                ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                border: Border.symmetric(horizontal: BorderSide(color: neutral30)),
+                color: neutral10,
               ),
-            ],
-          ),
+              child: Stack(
+                alignment: Alignment.centerRight,
+                children: [
+                  CustomFormField(
+                    controller: commentTextController,
+                    backgroundColor: backgroundCanvas,
+                    hint: 'Berikan komentar',
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      if (commentTextController.text.isNotEmpty) {
+                        final comment = CommentModel(
+                          idPost: widget.post.id,
+                          idUser: UserModel(id: widget.user.id),
+                          content: commentTextController.text,
+                        );
+
+                        komunitasCommentController.createComment(comment: comment);
+                        commentTextController.clear();
+                      }
+                    },
+                    icon: const Icon(IconsaxPlusLinear.send_1),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   void handlePostDeleted(BuildContext context) {
-    Navigator.of(context).pop(); // Pop the confirmation popup
-    Navigator.of(context).pop(); // Pop the detail post page
+    Get.back();
+    Get.back();
     showSnackbar(context, message: 'Postingan berhasil dihapus!');
   }
 
   void handleCommentDeleted(BuildContext context) {
-    Navigator.of(context).pop(); // Pop the confirmation popup
+    Get.back();
     showSnackbar(context, message: 'Komentar berhasil dihapus!');
   }
 
   void handlePostReported(BuildContext context) {
-    Navigator.of(context).pop(); // Pop the confirmation popup
+    Get.back();
     showSnackbar(context, message: 'Postingan berhasil dilaporkan!');
   }
 
   void handleCommentReported(BuildContext context) {
-    Navigator.of(context).pop(); // Pop the confirmation popup
+    Get.back();
     showSnackbar(context, message: 'Komentar berhasil dilaporkan!');
   }
 
-  void fetchComments(BuildContext context) {
-    context.read<KomunitasCommentBloc>().add(KomunitasFetchComments(
-          postId: widget.post.id.toString(),
-          latest: isLatest,
-        ));
+  void fetchComments() {
+    komunitasCommentController.fetchComments(
+      postId: widget.post.id.toString(),
+      latest: isLatest,
+    );
   }
 
-  void refreshCommentsCount(KomunitasCommentLoaded state) {
+  void refreshCommentsCount() {
     setState(() {
       (widget.post.comments ?? []).clear();
-      (widget.post.comments ?? []).addAll(state.commentModels.map((c) => c.idUser!.id!).toList());
+      (widget.post.comments ?? []).addAll(
+        komunitasCommentController.comments.map((c) => c.idUser!.id!).toList(),
+      );
     });
   }
 
-  Future<void> handleDeletePost(BuildContext context, KomunitasPostBloc postBloc) {
+  Future<void> handleDeletePost(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -351,7 +357,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => postBloc.add(KomunitasDeletePost(postId: widget.post.id.toString())),
+                  onTap: () => komunitasPostController.deletePost(postId: widget.post.id.toString()),
                   text: 'Ya, hapus',
                 ),
               ),
@@ -371,7 +377,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
     );
   }
 
-  Future<void> handleReportPost(BuildContext context, KomunitasReportBloc reportBloc) {
+  Future<void> handleReportPost(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -385,10 +391,10 @@ class _DetailPostPageState extends State<DetailPostPage> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => reportBloc.add(KomunitasReportPost(
+                  onTap: () => komunitasReportController.reportPost(
                     uid: widget.user.id.toString(),
                     postId: widget.post.id.toString(),
-                  )),
+                  ),
                   text: 'Ya, laporkan',
                 ),
               ),
@@ -408,7 +414,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
     );
   }
 
-  void handleLikePost(BuildContext context) {
+  void handleLikePost() {
     setState(() {
       isLiked = !isLiked;
       isLiked
@@ -417,13 +423,13 @@ class _DetailPostPageState extends State<DetailPostPage> {
     });
 
     isLiked
-        ? context.read<KomunitasPostBloc>().add(KomunitasLikePost(
-              uid: widget.user.id.toString(),
-              postId: widget.post.id.toString(),
-            ))
-        : context.read<KomunitasPostBloc>().add(KomunitasUnlikePost(
-              uid: widget.user.id.toString(),
-              postId: widget.post.id.toString(),
-            ));
+        ? komunitasPostController.likePost(
+            uid: widget.user.id.toString(),
+            postId: widget.post.id.toString(),
+          )
+        : komunitasPostController.unlikePost(
+            uid: widget.user.id.toString(),
+            postId: widget.post.id.toString(),
+          );
   }
 }

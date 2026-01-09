@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
@@ -7,8 +7,9 @@ import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
+import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../blocs/setelan_bloc.dart';
+import '../controllers/setelan_controller.dart';
 
 class UbahPasswordPage extends StatefulWidget {
   final UserModel user;
@@ -20,11 +21,19 @@ class UbahPasswordPage extends StatefulWidget {
 
 class _UbahPasswordPageState extends State<UbahPasswordPage> {
   final _emailController = TextEditingController();
+  final setelanController = Get.find<SetelanController>();
 
   @override
   void initState() {
     super.initState();
     _emailController.text = widget.user.email.toString();
+
+    ever(setelanController.passwordChanged, (changed) {
+      if (changed) {
+        handleUbahPassword(context);
+        setelanController.passwordChanged.value = false;
+      }
+    });
   }
 
   @override
@@ -35,78 +44,68 @@ class _UbahPasswordPageState extends State<UbahPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SetelanBloc, SetelanState>(
-      listener: (context, state) {
-        if (state is SetelanPasswordChanged) handleUbahPassword(context);
-      },
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const Icon(IconsaxPlusLinear.arrow_left),
+    return Scaffold(
+      appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () => Get.back(),
+          child: const Icon(IconsaxPlusLinear.arrow_left),
+        ),
+        backgroundColor: neutral10,
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            color: neutral10,
+            child: Column(
+              children: [
+                Text(
+                  'Ubah password',
+                  style: mediumTS.copyWith(fontSize: 24, color: neutral100),
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  'Masukkan email Anda untuk mendapatkan link reset password.',
+                  style: mediumTS.copyWith(color: neutral100.withValues(alpha: 0.6)),
+                  textAlign: TextAlign.center,
+                )
+              ],
             ),
-            backgroundColor: neutral10,
           ),
-          body: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                color: neutral10,
-                child: Column(
-                  children: [
-                    // Title
-                    Text(
-                      'Ubah password',
-                      style: mediumTS.copyWith(fontSize: 24, color: neutral100),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Subtitle
-                    Text(
-                      'Masukkan email Anda untuk mendapatkan link reset password.',
-                      style: mediumTS.copyWith(color: neutral100.withOpacity(0.6)),
-                      textAlign: TextAlign.center,
-                    )
-                  ],
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              children: [
+                const Text(
+                  'Email',
+                  style: mediumTS,
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  children: [
-                    // Email Field
-                    const Text(
-                      'Email',
-                      style: mediumTS,
-                    ),
-                    const SizedBox(height: 8),
-                    CustomFormField(
-                      isEnabled: false,
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      hint: 'Masukkan email anda',
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Submit button
-                    state is SetelanLoading
-                        ? const CustomLoadingButton()
-                        : CustomButton(
-                            onTap: () => context.read<SetelanBloc>().add(
-                                  SetelanChangePassword(email: _emailController.text),
-                                ),
-                            text: 'Konfirmasi',
-                          ),
-                  ],
+                const SizedBox(height: 8),
+                CustomFormField(
+                  isEnabled: false,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  hint: 'Masukkan email anda',
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+
+                Obx(() {
+                  if (setelanController.status.value == Status.loading) {
+                    return const CustomLoadingButton();
+                  }
+                  return CustomButton(
+                    onTap: () => setelanController.changePassword(email: _emailController.text),
+                    text: 'Konfirmasi',
+                  );
+                }),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 

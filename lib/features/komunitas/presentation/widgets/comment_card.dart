@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
@@ -9,8 +9,8 @@ import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
-import '../blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../blocs/komunitas_report/komunitas_report_bloc.dart';
+import '../controllers/komunitas_comment_controller.dart';
+import '../controllers/komunitas_report_controller.dart';
 import 'components/user_details.dart';
 
 class CommentCard extends StatefulWidget {
@@ -28,6 +28,8 @@ class CommentCard extends StatefulWidget {
 }
 
 class _CommentCardState extends State<CommentCard> {
+  final komunitasCommentController = Get.find<KomunitasCommentController>();
+  final komunitasReportController = Get.find<KomunitasReportController>();
   bool isLiked = false;
 
   @override
@@ -38,9 +40,6 @@ class _CommentCardState extends State<CommentCard> {
 
   @override
   Widget build(BuildContext context) {
-    final commentBloc = context.read<KomunitasCommentBloc>();
-    final reportBloc = context.read<KomunitasReportBloc>();
-
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -61,11 +60,10 @@ class _CommentCardState extends State<CommentCard> {
             widget: [
               const SizedBox(width: 16),
 
-              // Delete Button
               Column(
                 children: [
                   GestureDetector(
-                    onTap: () => handleLikeComment(context),
+                    onTap: () => handleLikeComment(),
                     child: Icon(
                       isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
                       color: isLiked ? dangerMain : neutral100,
@@ -91,12 +89,11 @@ class _CommentCardState extends State<CommentCard> {
 
           const SizedBox(height: 8),
 
-          // Delete Button
           widget.comment.idUser?.id == widget.user.id || widget.user.isAdmin
               ? Row(
                   children: [
                     GestureDetector(
-                      onTap: () => handleDeleteComment(context, commentBloc),
+                      onTap: () => handleDeleteComment(context),
                       child: Text(
                         'Hapus',
                         style: mediumTS.copyWith(fontSize: 12, color: neutral60),
@@ -115,7 +112,7 @@ class _CommentCardState extends State<CommentCard> {
                   ],
                 )
               : GestureDetector(
-                  onTap: () => handleReportComment(context, reportBloc),
+                  onTap: () => handleReportComment(context),
                   child: Text(
                     'Laporkan',
                     style: mediumTS.copyWith(fontSize: 12, color: neutral60),
@@ -126,7 +123,7 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  Future<void> handleDeleteComment(BuildContext context, KomunitasCommentBloc commentBloc) {
+  Future<void> handleDeleteComment(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -141,10 +138,10 @@ class _CommentCardState extends State<CommentCard> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => commentBloc.add(KomunitasDeleteComment(
+                  onTap: () => komunitasCommentController.deleteComment(
                     postId: widget.comment.idPost.toString(),
                     commentId: widget.comment.id.toString(),
-                  )),
+                  ),
                   text: 'Ya, hapus',
                 ),
               ),
@@ -164,7 +161,7 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  Future<void> handleReportComment(BuildContext context, KomunitasReportBloc reportBloc) {
+  Future<void> handleReportComment(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -178,10 +175,10 @@ class _CommentCardState extends State<CommentCard> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => reportBloc.add(KomunitasReportComment(
+                  onTap: () => komunitasReportController.reportComment(
                     uid: widget.user.id.toString(),
                     commentId: widget.comment.id.toString(),
-                  )),
+                  ),
                   text: 'Ya, laporkan',
                 ),
               ),
@@ -201,7 +198,7 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  void handleLikeComment(BuildContext context) {
+  void handleLikeComment() {
     setState(() {
       isLiked = !isLiked;
       isLiked
@@ -210,13 +207,13 @@ class _CommentCardState extends State<CommentCard> {
     });
 
     isLiked
-        ? context.read<KomunitasCommentBloc>().add(KomunitasLikeComment(
-              uid: widget.user.id.toString(),
-              commentId: widget.comment.id.toString(),
-            ))
-        : context.read<KomunitasCommentBloc>().add(KomunitasUnlikeComment(
-              uid: widget.user.id.toString(),
-              commentId: widget.comment.id.toString(),
-            ));
+        ? komunitasCommentController.likeComment(
+            uid: widget.user.id.toString(),
+            commentId: widget.comment.id.toString(),
+          )
+        : komunitasCommentController.unlikeComment(
+            uid: widget.user.id.toString(),
+            commentId: widget.comment.id.toString(),
+          );
   }
 }

@@ -20,7 +20,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await fetchUserModel(uid: uid);
       if (userModel != null) {
         if (user.user.email != userModel.email) {
-          await client.from('users').update({'email': user.user.email}).eq('id', uid);
+          await client
+              .from('users')
+              .update({'email': user.user.email})
+              .eq('id', uid);
         }
         return Right(userModel);
       }
@@ -51,18 +54,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final account = await client.auth.signUp(
         email: email,
         password: password,
+        data: {'name': name, 'profile_picture': null},
       );
-      await client.from('users').insert({
-        'id': account.user?.id,
-        'name': name,
-        'email': email,
-      });
 
-      return Right(UserModel(
-        id: account.user?.id,
-        name: name,
-        email: email,
-      ));
+      return Right(UserModel(id: account.user?.id, name: name, email: email));
     } on Exception catch (e) {
       return Left(e);
     }
@@ -84,7 +79,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = await fetchUserModel(uid: uid);
       if (userModel != null) {
         if (session.user?.email != userModel.email) {
-          await client.from('users').update({'email': session.user?.email}).eq('id', uid);
+          await client
+              .from('users')
+              .update({'email': session.user?.email})
+              .eq('id', uid);
         }
         return Right(userModel);
       }
@@ -138,7 +136,12 @@ class AuthRepositoryImpl implements AuthRepository {
         updates['profile_picture'] = url;
       }
 
-      final response = await client.from('users').update(updates).eq('id', uid).select().single();
+      final response = await client
+          .from('users')
+          .update(updates)
+          .eq('id', uid)
+          .select()
+          .single();
 
       final updatedUser = UserModel.fromMap(response);
       return Right(updatedUser);

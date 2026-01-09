@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -15,8 +15,8 @@ import '../../../../core/utils/format.dart';
 import '../../../../core/utils/network_image.dart';
 import '../../../home/presentation/widgets/disoriza_logo.dart';
 import '../../data/models/riwayat_model.dart';
-import '../blocs/riwayat_history/riwayat_history_bloc.dart';
-import '../blocs/riwayat_scan/riwayat_scan_bloc.dart';
+import '../controllers/riwayat_history_controller.dart';
+import '../controllers/riwayat_scan_controller.dart';
 import '../widgets/riwayat_detail_card.dart';
 import '../widgets/riwayat_detail_remote.dart';
 
@@ -30,6 +30,8 @@ class RiwayatDetail extends StatefulWidget {
 
 class _RiwayatDetailState extends State<RiwayatDetail> {
   final _scrollController = AutoScrollController();
+  final riwayatHistoryController = Get.find<RiwayatHistoryController>();
+  final riwayatScanController = Get.find<RiwayatScanController>();
   int _currentIndex = 0;
 
   @override
@@ -47,9 +49,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
   @override
   Widget build(BuildContext context) {
-    final historyBloc = context.read<RiwayatHistoryBloc>();
-    final scanBloc = context.read<RiwayatScanBloc>();
-
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
@@ -59,20 +58,17 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
           bottom: BorderSide(color: neutral30),
         ),
 
-        // Back Button
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Get.back(),
           icon: const Icon(IconsaxPlusLinear.arrow_left),
         ),
 
-        // Logo
         title: const DisorizaLogo(),
         centerTitle: true,
 
-        // Delete Button
         actions: [
           IconButton(
-            onPressed: () => handleDeleteRiwayat(context, historyBloc),
+            onPressed: () => handleDeleteRiwayat(context),
             icon: const Icon(IconsaxPlusLinear.trash, color: dangerMain),
           ),
         ],
@@ -81,7 +77,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
         controller: _scrollController,
         padding: const EdgeInsets.all(8),
         children: [
-          // About the diseases
           Container(
             height: 380,
             decoration: BoxDecoration(
@@ -122,10 +117,10 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
                         onTap: () async {
                           final img = await pickImage(context);
                           if (img != null) {
-                            scanBloc.add(RiwayatScanDisease(
+                            riwayatScanController.scanDisease(
                               uid: widget.riwayat.idUser.toString(),
                               image: img,
-                            ));
+                            );
                           }
                         },
                         child: Container(
@@ -151,7 +146,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
           Row(
             children: [
-              // Tanggal
               Expanded(
                 flex: 5,
                 child: RiwayatDetailCard(
@@ -164,7 +158,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
               const SizedBox(width: 8),
 
-              // Akurasi
               Expanded(
                 flex: 4,
                 child: RiwayatDetailCard(
@@ -179,7 +172,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
           const SizedBox(height: 8),
 
-          // Definisi
           RiwayatDetailCard(
             index: 0,
             controller: _scrollController,
@@ -189,7 +181,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
           const SizedBox(height: 8),
 
-          // Gejala
           RiwayatDetailCard(
             index: 1,
             controller: _scrollController,
@@ -199,7 +190,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
           const SizedBox(height: 8),
 
-          // Solusi
           RiwayatDetailCard(
             index: 2,
             controller: _scrollController,
@@ -211,7 +201,6 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
         ],
       ),
 
-      // Section Remote
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Container(
         margin: const EdgeInsets.all(40),
@@ -247,7 +236,7 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
     );
   }
 
-  Future<void> handleDeleteRiwayat(BuildContext context, RiwayatHistoryBloc historyBloc) {
+  Future<void> handleDeleteRiwayat(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -262,7 +251,7 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => historyBloc.add(RiwayatDeleteRiwayat(riwayatId: widget.riwayat.id.toString())),
+                  onTap: () => riwayatHistoryController.deleteRiwayat(riwayatId: widget.riwayat.id.toString()),
                   text: 'Ya, hapus',
                 ),
               ),
@@ -283,11 +272,9 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
   }
 
   void _onScroll() {
-    // Get the current scroll position
     final double viewportHeight = _scrollController.position.viewportDimension;
-    final double screenTriggerOffset = viewportHeight * 0.3; // 30% of screen height
+    final double screenTriggerOffset = viewportHeight * 0.3;
 
-    // Check each section's position
     for (int i = 0; i < 3; i++) {
       final RenderObject? renderObject = _scrollController.tagMap[i]?.context.findRenderObject();
 
@@ -295,9 +282,7 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
         final position = renderObject.localToGlobal(Offset.zero);
         final itemOffset = position.dy - _scrollController.offset;
 
-        // Consider a section "active" when its top portion is in the upper part of the screen
         if (itemOffset <= screenTriggerOffset) {
-          // Check if this is the last visible section
           if (i == 2 ||
               (_scrollController.tagMap[i + 1]?.context.findRenderObject() as RenderBox?)!
                       .localToGlobal(Offset.zero)
@@ -314,13 +299,11 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
   }
 
   Future _scrollToIndex(int index) async {
-    // Calculate offset based on screen height
     final double viewportHeight = _scrollController.position.viewportDimension;
-    final double offset = viewportHeight * 0.15; // 15% of screen height
+    final double offset = viewportHeight * 0.15;
 
     await _scrollController.scrollToIndex(index, preferPosition: AutoScrollPosition.begin);
 
-    // Apply additional offset after scrolling to position
     final targetContext = _scrollController.tagMap[index]?.context;
     if (targetContext != null) {
       final RenderObject? renderObject = targetContext.findRenderObject();

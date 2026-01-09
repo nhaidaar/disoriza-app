@@ -47,8 +47,14 @@ class AuthPage extends StatelessWidget {
                       color: backgroundCanvas,
                     ),
                     child: TabBar(
-                      labelStyle: mediumTS.copyWith(fontSize: 16, color: accentGreenMain),
-                      unselectedLabelStyle: mediumTS.copyWith(fontSize: 16, color: neutral60),
+                      labelStyle: mediumTS.copyWith(
+                        fontSize: 16,
+                        color: accentGreenMain,
+                      ),
+                      unselectedLabelStyle: mediumTS.copyWith(
+                        fontSize: 16,
+                        color: neutral60,
+                      ),
                       indicator: BoxDecoration(
                         color: neutral10,
                         borderRadius: BorderRadius.circular(100),
@@ -70,10 +76,7 @@ class AuthPage extends StatelessWidget {
             const Expanded(
               child: TabBarView(
                 physics: NeverScrollableScrollPhysics(),
-                children: [
-                  RegisterPage(),
-                  LoginPage(),
-                ],
+                children: [RegisterPage(), LoginPage()],
               ),
             ),
           ],

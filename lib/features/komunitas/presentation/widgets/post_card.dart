@@ -1,9 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_loading/card_loading.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/custom_avatar.dart';
@@ -11,9 +10,7 @@ import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/post_model.dart';
-import '../blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../blocs/komunitas_post/komunitas_post_bloc.dart';
-import '../blocs/komunitas_report/komunitas_report_bloc.dart';
+import '../controllers/komunitas_post_controller.dart';
 import '../pages/detail_post_page.dart';
 import 'components/user_details.dart';
 
@@ -36,6 +33,7 @@ class PostCard extends StatefulWidget {
 }
 
 class _PostCardState extends State<PostCard> {
+  final komunitasPostController = Get.find<KomunitasPostController>();
   bool isLiked = false;
   bool isCommented = false;
   bool isReported = false;
@@ -52,19 +50,7 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        PageTransition(
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: context.read<KomunitasPostBloc>()),
-              BlocProvider.value(value: context.read<KomunitasCommentBloc>()),
-              BlocProvider.value(value: context.read<KomunitasReportBloc>()),
-            ],
-            child: DetailPostPage(user: widget.user, post: widget.post),
-          ),
-          type: PageTransitionType.rightToLeft,
-        ),
-      ),
+      onTap: () => Get.to(() => DetailPostPage(user: widget.user, post: widget.post)),
       child: Container(
         margin: widget.isBerandaCard ? const EdgeInsets.symmetric(horizontal: 10) : const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
@@ -104,7 +90,6 @@ class _PostCardState extends State<PostCard> {
 
             const SizedBox(height: 4),
 
-            // Image (optional)
             if (!widget.isBerandaCard && widget.post.urlImage != null) ...[
               const SizedBox(height: 8),
               ClipRRect(
@@ -119,9 +104,8 @@ class _PostCardState extends State<PostCard> {
 
             Row(
               children: [
-                // Like
                 GestureDetector(
-                  onTap: () => handleLikePost(context),
+                  onTap: () => handleLikePost(),
                   child: Icon(
                     isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
                     color: isLiked ? dangerMain : neutral100,
@@ -136,7 +120,6 @@ class _PostCardState extends State<PostCard> {
 
                 const SizedBox(width: 16),
 
-                // Comment
                 const Icon(
                   IconsaxPlusLinear.message_text_1,
                   color: neutral100,
@@ -173,7 +156,7 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  void handleLikePost(BuildContext context) {
+  void handleLikePost() {
     setState(() {
       isLiked = !isLiked;
       isLiked
@@ -182,14 +165,14 @@ class _PostCardState extends State<PostCard> {
     });
 
     isLiked
-        ? context.read<KomunitasPostBloc>().add(KomunitasLikePost(
-              uid: widget.user.id.toString(),
-              postId: widget.post.id.toString(),
-            ))
-        : context.read<KomunitasPostBloc>().add(KomunitasUnlikePost(
-              uid: widget.user.id.toString(),
-              postId: widget.post.id.toString(),
-            ));
+        ? komunitasPostController.likePost(
+            uid: widget.user.id.toString(),
+            postId: widget.post.id.toString(),
+          )
+        : komunitasPostController.unlikePost(
+            uid: widget.user.id.toString(),
+            postId: widget.post.id.toString(),
+          );
   }
 }
 

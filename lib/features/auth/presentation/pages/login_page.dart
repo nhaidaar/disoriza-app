@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
-import '../blocs/auth_bloc.dart';
+import '../../../../core/enums/status.dart';
+import '../controllers/auth_controller.dart';
 import 'forgot_password_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -48,12 +48,13 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authController = Get.find<AuthController>();
+
     return Scaffold(
       body: ListView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          // Field email
           Text('Email', style: mediumTS.copyWith(color: neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
@@ -63,7 +64,6 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 12),
 
-          // Field password
           Text('Password', style: mediumTS.copyWith(color: neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
@@ -79,22 +79,11 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 12),
 
-          // Forgot Password
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    PageTransition(
-                      child: BlocProvider.value(
-                        value: context.read<AuthBloc>(),
-                        child: const ForgotPasswordPage(),
-                      ),
-                      type: PageTransitionType.rightToLeft,
-                    ),
-                  );
-                },
+                onTap: () => Get.to(() => const ForgotPasswordPage()),
                 child: Text(
                   'Lupa password?',
                   style: mediumTS.copyWith(color: neutral100),
@@ -105,22 +94,21 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 24),
 
-          // Daftar Button
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading) return const CustomLoadingButton();
-              return CustomButton(
-                text: 'Masuk',
-                disabled: areFieldsEmpty,
-                onTap: () {
-                  context.read<AuthBloc>().add(AuthLogin(
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                      ));
-                },
-              );
-            },
-          ),
+          Obx(() {
+            if (authController.status.value == Status.loading) {
+              return const CustomLoadingButton();
+            }
+            return CustomButton(
+              text: 'Masuk',
+              disabled: areFieldsEmpty,
+              onTap: () {
+                authController.login(
+                  email: _emailController.text,
+                  password: _passwordController.text,
+                );
+              },
+            );
+          }),
         ],
       ),
     );

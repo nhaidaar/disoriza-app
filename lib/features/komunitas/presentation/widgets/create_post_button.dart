@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../blocs/komunitas_post/komunitas_post_bloc.dart';
 import '../pages/create_post_page.dart';
 
 class CreatePostButton extends StatelessWidget {
@@ -27,17 +25,7 @@ class CreatePostButton extends StatelessWidget {
         ),
       ),
       child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-            PageTransition(
-              child: BlocProvider.value(
-                value: context.read<KomunitasPostBloc>(),
-                child: CreatePostPage(user: user),
-              ),
-              type: PageTransitionType.rightToLeft,
-            ),
-          );
-        },
+        onTap: () => Get.to(() => CreatePostPage(user: user)),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
@@ -47,13 +35,11 @@ class CreatePostButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Greeting Message
               Text(
                 'Apa yang ingin kamu tanya atau bagikan?',
                 style: mediumTS.copyWith(color: neutral70),
               ),
 
-              // Icon Create Content
               const Icon(IconsaxPlusLinear.edit)
             ],
           ),
