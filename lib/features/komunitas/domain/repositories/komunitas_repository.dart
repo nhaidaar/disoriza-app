@@ -43,6 +43,7 @@ abstract class KomunitasRepository {
   Future<Either<Exception, void>> reportPost({
     required String uid,
     required String postId,
+    String? reason,
   });
 
   Future<Either<Exception, List<CommentModel>>> fetchComments({
@@ -69,5 +70,6 @@ abstract class KomunitasRepository {
   Future<Either<Exception, void>> reportComment({
     required String uid,
     required String commentId,
+    String? reason,
   });
 }

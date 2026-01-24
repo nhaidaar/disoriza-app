@@ -4,8 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../../../komunitas/presentation/controllers/komunitas_comment_controller.dart';
-import '../../../komunitas/presentation/controllers/komunitas_post_controller.dart';
+import '../../../komunitas/presentation/controllers/komunitas_controller.dart';
 import '../../../komunitas/presentation/widgets/post_card.dart';
 import '../../../komunitas/presentation/widgets/reported_comment_card.dart';
 
@@ -18,25 +17,24 @@ class LaporanKomentar extends StatefulWidget {
 }
 
 class _LaporanKomentarState extends State<LaporanKomentar> {
-  final komunitasPostController = Get.find<KomunitasPostController>();
-  final komunitasCommentController = Get.find<KomunitasCommentController>();
+  final komunitasController = Get.find<KomunitasController>();
 
   @override
   void initState() {
     super.initState();
     fetchReportedComments();
 
-    ever(komunitasCommentController.commentDeleted, (deleted) {
+    ever(komunitasController.commentDeleted, (deleted) {
       if (deleted) {
         fetchReportedComments();
-        komunitasCommentController.commentDeleted.value = false;
+        komunitasController.commentDeleted.value = false;
       }
     });
 
-    ever(komunitasPostController.postDeleted, (deleted) {
+    ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         fetchReportedComments();
-        komunitasPostController.postDeleted.value = false;
+        komunitasController.postDeleted.value = false;
       }
     });
   }
@@ -48,13 +46,13 @@ class _LaporanKomentarState extends State<LaporanKomentar> {
       child: Obx(() {
         return ListView(
           padding: const EdgeInsets.all(8),
-          children: komunitasPostController.status.value == Status.loading
+          children: komunitasController.commentsStatus.value == Status.loading
               ? [
                   const PostLoadingCard(),
                 ]
-              : komunitasPostController.status.value == Status.success
-                  ? komunitasPostController.reportedComments.isNotEmpty
-                      ? komunitasPostController.reportedComments.map((model) {
+              : komunitasController.commentsStatus.value == Status.success
+                  ? komunitasController.reportedComments.isNotEmpty
+                      ? komunitasController.reportedComments.map((model) {
                           return ReportedCommentCard(
                             user: widget.user,
                             comment: model.commentModel,
@@ -73,6 +71,6 @@ class _LaporanKomentarState extends State<LaporanKomentar> {
   }
 
   void fetchReportedComments() {
-    komunitasPostController.fetchReportedComments();
+    komunitasController.fetchReportedComments();
   }
 }

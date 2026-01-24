@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../../../komunitas/presentation/controllers/komunitas_post_controller.dart';
+import '../../../komunitas/presentation/controllers/komunitas_controller.dart';
 import '../../../komunitas/presentation/widgets/post_card.dart';
 import '../../../komunitas/presentation/widgets/reported_post_card.dart';
 
@@ -17,17 +17,17 @@ class LaporanPostingan extends StatefulWidget {
 }
 
 class _LaporanPostinganState extends State<LaporanPostingan> {
-  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasController = Get.find<KomunitasController>();
 
   @override
   void initState() {
     super.initState();
     fetchReportedPosts();
 
-    ever(komunitasPostController.postDeleted, (deleted) {
+    ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         fetchReportedPosts();
-        komunitasPostController.postDeleted.value = false;
+        komunitasController.postDeleted.value = false;
       }
     });
   }
@@ -39,13 +39,13 @@ class _LaporanPostinganState extends State<LaporanPostingan> {
       child: Obx(() {
         return ListView(
           padding: const EdgeInsets.all(8),
-          children: komunitasPostController.status.value == Status.loading
+          children: komunitasController.postsStatus.value == Status.loading
               ? [
                   const PostLoadingCard(),
                 ]
-              : komunitasPostController.status.value == Status.success
-                  ? komunitasPostController.posts.isNotEmpty
-                      ? komunitasPostController.posts.map((post) {
+              : komunitasController.postsStatus.value == Status.success
+                  ? komunitasController.reportedPosts.isNotEmpty
+                      ? komunitasController.reportedPosts.map((post) {
                           return ReportedPostCard(user: widget.user, post: post);
                         }).toList()
                       : [
@@ -60,6 +60,6 @@ class _LaporanPostinganState extends State<LaporanPostingan> {
   }
 
   void fetchReportedPosts() {
-    komunitasPostController.fetchReportedPosts();
+    komunitasController.fetchReportedPosts();
   }
 }

@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../controllers/komunitas_post_controller.dart';
+import '../controllers/komunitas_controller.dart';
 import '../widgets/aktivitasmu_category.dart';
 import '../widgets/post_card.dart';
 
@@ -18,7 +18,8 @@ class KomunitasAktivitas extends StatefulWidget {
 
 class _KomunitasAktivitasState extends State<KomunitasAktivitas> {
   int _selectedIndex = 0;
-  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasController = Get.find<KomunitasController>();
+  final List<Worker> _workers = [];
 
   final aktivitasCategory = [
     'Postingan',
@@ -30,14 +31,26 @@ class _KomunitasAktivitasState extends State<KomunitasAktivitas> {
   @override
   void initState() {
     super.initState();
-    fetchAktivitas();
 
-    ever(komunitasPostController.postDeleted, (deleted) {
+    // Defer fetch to after build completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchAktivitas();
+    });
+
+    _workers.add(ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         fetchAktivitas();
-        komunitasPostController.postDeleted.value = false;
+        komunitasController.postDeleted.value = false;
       }
-    });
+    }));
+  }
+
+  @override
+  void dispose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -61,7 +74,7 @@ class _KomunitasAktivitasState extends State<KomunitasAktivitas> {
                   onTap: () => setState(() {
                     if (_selectedIndex != index) {
                       _selectedIndex = index;
-                      komunitasPostController.fetchAktivitas(
+                      komunitasController.fetchAktivitas(
                         uid: widget.user.id.toString(),
                         filter: aktivitasCategory[_selectedIndex],
                       );
@@ -79,7 +92,7 @@ class _KomunitasAktivitasState extends State<KomunitasAktivitas> {
 
         Expanded(
           child: RefreshIndicator(
-            onRefresh: () async => komunitasPostController.fetchAktivitas(
+            onRefresh: () async => komunitasController.fetchAktivitas(
               uid: widget.user.id.toString(),
               filter: aktivitasCategory[_selectedIndex],
             ),
@@ -88,12 +101,12 @@ class _KomunitasAktivitasState extends State<KomunitasAktivitas> {
               padding: const EdgeInsets.symmetric(horizontal: 8),
               children: [
                 Obx(() {
-                  if (komunitasPostController.status.value == Status.loading) {
+                  if (komunitasController.postsStatus.value == Status.loading) {
                     return const PostLoadingCard();
-                  } else if (komunitasPostController.status.value == Status.success) {
-                    return komunitasPostController.posts.isNotEmpty
+                  } else if (komunitasController.postsStatus.value == Status.success) {
+                    return komunitasController.posts.isNotEmpty
                         ? Column(
-                            children: komunitasPostController.posts.map((post) {
+                            children: komunitasController.posts.map((post) {
                               return PostCard(
                                 user: widget.user,
                                 post: post,
@@ -114,7 +127,7 @@ class _KomunitasAktivitasState extends State<KomunitasAktivitas> {
   }
 
   void fetchAktivitas() {
-    komunitasPostController.fetchAktivitas(
+    komunitasController.fetchAktivitas(
       uid: widget.user.id.toString(),
       filter: aktivitasCategory[_selectedIndex],
     );

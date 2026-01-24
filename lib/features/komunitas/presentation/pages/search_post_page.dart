@@ -10,7 +10,7 @@ import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../controllers/komunitas_search_controller.dart';
+import '../controllers/komunitas_controller.dart';
 import '../widgets/post_card.dart';
 
 class SearchPostPage extends StatefulWidget {
@@ -23,13 +23,15 @@ class SearchPostPage extends StatefulWidget {
 
 class _SearchPostPageState extends State<SearchPostPage> {
   final _searchController = TextEditingController();
-  final komunitasSearchController = Get.find<KomunitasSearchController>();
+  final komunitasController = Get.find<KomunitasController>();
   Timer? _debounce;
 
   @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
+    // Clear search results when leaving the page
+    komunitasController.clearSearch();
     super.dispose();
   }
 
@@ -68,7 +70,7 @@ class _SearchPostPageState extends State<SearchPostPage> {
               onChanged: (value) {
                 _debounce?.cancel();
                 _debounce = Timer(const Duration(milliseconds: 500), () {
-                  komunitasSearchController.searchPost(search: value);
+                  komunitasController.searchPost(search: value);
                 });
               },
             ),
@@ -78,13 +80,13 @@ class _SearchPostPageState extends State<SearchPostPage> {
       body: Obx(() {
         return ListView(
           padding: const EdgeInsets.all(8),
-          children: komunitasSearchController.status.value == Status.loading
+          children: komunitasController.searchStatus.value == Status.loading
               ? [
                   const PostLoadingCard(),
                 ]
-              : komunitasSearchController.status.value == Status.success
-                  ? komunitasSearchController.searchResults.isNotEmpty
-                      ? komunitasSearchController.searchResults.map((post) {
+              : komunitasController.searchStatus.value == Status.success
+                  ? komunitasController.searchResults.isNotEmpty
+                      ? komunitasController.searchResults.map((post) {
                           return PostCard(user: widget.user, post: post);
                         }).toList()
                       : [

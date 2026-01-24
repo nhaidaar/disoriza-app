@@ -7,10 +7,10 @@ import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
+import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
-import '../controllers/komunitas_comment_controller.dart';
-import '../controllers/komunitas_report_controller.dart';
+import '../controllers/komunitas_controller.dart';
 import 'components/user_details.dart';
 
 class CommentCard extends StatefulWidget {
@@ -28,8 +28,7 @@ class CommentCard extends StatefulWidget {
 }
 
 class _CommentCardState extends State<CommentCard> {
-  final komunitasCommentController = Get.find<KomunitasCommentController>();
-  final komunitasReportController = Get.find<KomunitasReportController>();
+  final komunitasController = Get.find<KomunitasController>();
   bool isLiked = false;
 
   @override
@@ -138,7 +137,7 @@ class _CommentCardState extends State<CommentCard> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => komunitasCommentController.deleteComment(
+                  onTap: () => komunitasController.deleteComment(
                     postId: widget.comment.idPost.toString(),
                     commentId: widget.comment.id.toString(),
                   ),
@@ -175,7 +174,7 @@ class _CommentCardState extends State<CommentCard> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => komunitasReportController.reportComment(
+                  onTap: () => komunitasController.reportComment(
                     uid: widget.user.id.toString(),
                     commentId: widget.comment.id.toString(),
                   ),
@@ -198,7 +197,11 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  void handleLikeComment() {
+  void handleLikeComment() async {
+    final wasLiked = isLiked;
+    final previousLikes = List<String>.from(widget.comment.likes ?? []);
+
+    // Optimistic update
     setState(() {
       isLiked = !isLiked;
       isLiked
@@ -206,14 +209,34 @@ class _CommentCardState extends State<CommentCard> {
           : (widget.comment.likes ?? []).remove(widget.user.id.toString());
     });
 
-    isLiked
-        ? komunitasCommentController.likeComment(
-            uid: widget.user.id.toString(),
-            commentId: widget.comment.id.toString(),
-          )
-        : komunitasCommentController.unlikeComment(
-            uid: widget.user.id.toString(),
-            commentId: widget.comment.id.toString(),
-          );
+    try {
+      if (isLiked) {
+        await komunitasController.likeComment(
+          uid: widget.user.id.toString(),
+          commentId: widget.comment.id.toString(),
+        );
+      } else {
+        await komunitasController.unlikeComment(
+          uid: widget.user.id.toString(),
+          commentId: widget.comment.id.toString(),
+        );
+      }
+
+      // Rollback on error
+      if (komunitasController.actionStatus.value == Status.error) {
+        setState(() {
+          isLiked = wasLiked;
+          (widget.comment.likes ?? []).clear();
+          (widget.comment.likes ?? []).addAll(previousLikes);
+        });
+      }
+    } catch (e) {
+      // Rollback on exception
+      setState(() {
+        isLiked = wasLiked;
+        (widget.comment.likes ?? []).clear();
+        (widget.comment.likes ?? []).addAll(previousLikes);
+      });
+    }
   }
 }

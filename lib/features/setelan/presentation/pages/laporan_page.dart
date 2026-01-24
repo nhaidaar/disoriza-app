@@ -7,7 +7,7 @@ import '../../../../core/common/fontstyles.dart';
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/snackbar.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../../../komunitas/presentation/controllers/komunitas_post_controller.dart';
+import '../../../komunitas/presentation/controllers/komunitas_controller.dart';
 import 'laporan_komentar.dart';
 import 'laporan_postingan.dart';
 
@@ -20,15 +20,25 @@ class LaporanPage extends StatefulWidget {
 }
 
 class _LaporanPageState extends State<LaporanPage> {
-  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasController = Get.find<KomunitasController>();
 
   @override
   void initState() {
     super.initState();
-    ever(komunitasPostController.status, (status) {
-      if (status == Status.error && komunitasPostController.errorMessage.value.isNotEmpty) {
-        showSnackbar(context, message: komunitasPostController.errorMessage.value, isError: true);
-        komunitasPostController.errorMessage.value = '';
+
+    // Listen for posts errors
+    ever(komunitasController.postsStatus, (status) {
+      if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
+        showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
+        komunitasController.errorMessage.value = '';
+      }
+    });
+
+    // Listen for comments errors
+    ever(komunitasController.commentsStatus, (status) {
+      if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
+        showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
+        komunitasController.errorMessage.value = '';
       }
     });
   }

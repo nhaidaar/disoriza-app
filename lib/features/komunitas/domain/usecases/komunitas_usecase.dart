@@ -80,10 +80,12 @@ class KomunitasUsecase {
   Future<Either<Exception, void>> reportPost({
     required String uid,
     required String postId,
+    String? reason,
   }) {
     return _komunitasRepository.reportPost(
       uid: uid,
       postId: postId,
+      reason: reason,
     );
   }
 
@@ -132,10 +134,12 @@ class KomunitasUsecase {
   Future<Either<Exception, void>> reportComment({
     required String uid,
     required String commentId,
+    String? reason,
   }) {
     return _komunitasRepository.reportComment(
       uid: uid,
       commentId: commentId,
+      reason: reason,
     );
   }
 }

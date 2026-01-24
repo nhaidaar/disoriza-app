@@ -1,21 +1,21 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/usecases/auth_usecase.dart';
-import '../../features/auth/presentation/controllers/auth_controller.dart';
-import '../../features/komunitas/data/repositories/komunitas_repository_impl.dart';
-import '../../features/komunitas/domain/usecases/komunitas_usecase.dart';
-import '../../features/komunitas/presentation/controllers/komunitas_comment_controller.dart';
-import '../../features/komunitas/presentation/controllers/komunitas_post_controller.dart';
-import '../../features/komunitas/presentation/controllers/komunitas_report_controller.dart';
-import '../../features/komunitas/presentation/controllers/komunitas_search_controller.dart';
-import '../../features/riwayat/data/repositories/riwayat_repository_impl.dart';
-import '../../features/riwayat/domain/usecases/riwayat_usecase.dart';
-import '../../features/riwayat/presentation/controllers/riwayat_history_controller.dart';
-import '../../features/riwayat/presentation/controllers/riwayat_scan_controller.dart';
-import '../../features/setelan/presentation/controllers/setelan_controller.dart';
+import '../../features/auth/presentation/controllers/auth_binding.dart';
+import '../../features/komunitas/presentation/controllers/komunitas_binding.dart';
+import '../../features/riwayat/presentation/controllers/riwayat_binding.dart';
+import '../../features/setelan/presentation/controllers/setelan_binding.dart';
 
+/// Main application bindings that orchestrates all feature bindings.
+///
+/// This class delegates dependency injection to individual feature bindings,
+/// promoting separation of concerns and making each feature self-contained.
+///
+/// Binding Strategy:
+/// - AuthBinding: Uses `put` with `permanent: true` (session must persist)
+/// - KomunitasBinding: Uses `lazyPut` with `fenix: true` (lazy, recreatable)
+/// - RiwayatBinding: Uses `lazyPut` with `fenix: true` (lazy, recreatable)
+/// - SetelanBinding: Uses `lazyPut` with `fenix: true` (lazy, recreatable)
 class AppBindings extends Bindings {
   final SupabaseClient client;
 
@@ -23,34 +23,12 @@ class AppBindings extends Bindings {
 
   @override
   void dependencies() {
-    final authRepository = AuthRepositoryImpl(client: client);
-    final authUsecase = AuthUsecase(authRepository);
+    // Auth - must be initialized first and persist throughout app lifecycle
+    AuthBinding(client: client).dependencies();
 
-    final komunitasRepository = KomunitasRepositoryImpl(client: client);
-    final komunitasUsecase = KomunitasUsecase(komunitasRepository);
-
-    final riwayatRepository = RiwayatRepositoryImpl(client: client);
-    final riwayatUsecase = RiwayatUsecase(riwayatRepository);
-
-    Get.put<AuthController>(AuthController(authUsecase));
-    Get.put<KomunitasPostController>(
-      KomunitasPostController(komunitasUsecase),
-      permanent: true,
-    );
-    Get.put<KomunitasCommentController>(
-      KomunitasCommentController(komunitasUsecase),
-      permanent: true,
-    );
-    Get.put<KomunitasSearchController>(
-      KomunitasSearchController(komunitasUsecase),
-      permanent: true,
-    );
-    Get.put<KomunitasReportController>(
-      KomunitasReportController(komunitasUsecase),
-      permanent: true,
-    );
-    Get.put<RiwayatHistoryController>(RiwayatHistoryController(riwayatUsecase));
-    Get.put<RiwayatScanController>(RiwayatScanController(riwayatUsecase));
-    Get.put<SetelanController>(SetelanController(authUsecase));
+    // Feature bindings - lazy loaded when needed
+    KomunitasBinding(client: client).dependencies();
+    RiwayatBinding(client: client).dependencies();
+    SetelanBinding(client: client).dependencies();
   }
 }

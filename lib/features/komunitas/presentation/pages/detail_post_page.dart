@@ -16,9 +16,7 @@ import '../../../../core/utils/snackbar.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
 import '../../data/models/post_model.dart';
-import '../controllers/komunitas_comment_controller.dart';
-import '../controllers/komunitas_post_controller.dart';
-import '../controllers/komunitas_report_controller.dart';
+import '../controllers/komunitas_controller.dart';
 import '../widgets/comment_card.dart';
 import '../widgets/components/user_details.dart';
 import '../widgets/post_card.dart';
@@ -38,50 +36,63 @@ class DetailPostPage extends StatefulWidget {
 
 class _DetailPostPageState extends State<DetailPostPage> {
   final commentTextController = TextEditingController();
-  final komunitasPostController = Get.find<KomunitasPostController>();
-  final komunitasCommentController = Get.find<KomunitasCommentController>();
-  final komunitasReportController = Get.find<KomunitasReportController>();
+  final komunitasController = Get.find<KomunitasController>();
 
-  bool isLiked = false;
   bool isLatest = false;
+
+  /// Gets the current post from controller or falls back to widget.post.
+  /// This ensures we always display the latest state.
+  PostModel get currentPost {
+    final postId = widget.post.id;
+
+    // Check posts list first
+    final inPosts = komunitasController.posts.firstWhereOrNull((p) => p.id == postId);
+    if (inPosts != null) return inPosts;
+
+    // Check search results
+    final inSearch = komunitasController.searchResults.firstWhereOrNull((p) => p.id == postId);
+    if (inSearch != null) return inSearch;
+
+    // Check reported posts
+    final inReported = komunitasController.reportedPosts.firstWhereOrNull((p) => p.id == postId);
+    if (inReported != null) return inReported;
+
+    // Fall back to widget.post
+    return widget.post;
+  }
+
+  bool get isLiked => (currentPost.likes ?? []).contains(widget.user.id);
 
   @override
   void initState() {
-    isLiked = (widget.post.likes ?? []).contains(widget.user.id);
     fetchComments();
     super.initState();
 
-    ever(komunitasPostController.postDeleted, (deleted) {
+    ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         handlePostDeleted(context);
-        komunitasPostController.postDeleted.value = false;
+        komunitasController.postDeleted.value = false;
       }
     });
 
-    ever(komunitasCommentController.status, (status) {
-      if (status == Status.success) {
-        refreshCommentsCount();
-      }
-    });
-
-    ever(komunitasCommentController.commentDeleted, (deleted) {
+    ever(komunitasController.commentDeleted, (deleted) {
       if (deleted) {
         handleCommentDeleted(context);
-        komunitasCommentController.commentDeleted.value = false;
+        komunitasController.commentDeleted.value = false;
       }
     });
 
-    ever(komunitasReportController.postReported, (reported) {
+    ever(komunitasController.postReported, (reported) {
       if (reported) {
         handlePostReported(context);
-        komunitasReportController.postReported.value = false;
+        komunitasController.postReported.value = false;
       }
     });
 
-    ever(komunitasReportController.commentReported, (reported) {
+    ever(komunitasController.commentReported, (reported) {
       if (reported) {
         handleCommentReported(context);
-        komunitasReportController.commentReported.value = false;
+        komunitasController.commentReported.value = false;
       }
     });
   }
@@ -182,36 +193,40 @@ class _DetailPostPageState extends State<DetailPostPage> {
 
                       const SizedBox(height: 12),
 
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => handleLikePost(),
-                            child: Icon(
-                              isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
-                              color: isLiked ? dangerMain : neutral100,
+                      Obx(() {
+                        final post = currentPost;
+                        final liked = isLiked;
+                        return Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => handleLikePost(),
+                              child: Icon(
+                                liked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
+                                color: liked ? dangerMain : neutral100,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              post.likesCount.toString(),
+                              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                            ),
+
+                            const SizedBox(width: 16),
+
+                            const Icon(
+                              IconsaxPlusLinear.message_text_1,
+                              color: neutral100,
                               size: 20,
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            (widget.post.likes ?? []).length.toString(),
-                            style: mediumTS.copyWith(fontSize: 12, color: neutral80),
-                          ),
-
-                          const SizedBox(width: 16),
-
-                          const Icon(
-                            IconsaxPlusLinear.message_text_1,
-                            color: neutral100,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            (widget.post.comments ?? []).length.toString(),
-                            style: mediumTS.copyWith(fontSize: 12, color: neutral80),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(width: 4),
+                            Text(
+                              post.commentsCount.toString(),
+                              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                            ),
+                          ],
+                        );
+                      }),
 
                       const SizedBox(height: 12),
 
@@ -233,7 +248,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
                             onChanged: (filter) async {
                               if (isLatest != filter.value) {
                                 isLatest = !isLatest;
-                                komunitasCommentController.fetchComments(
+                                komunitasController.fetchComments(
                                   postId: widget.post.id.toString(),
                                   latest: isLatest,
                                 );
@@ -246,12 +261,12 @@ class _DetailPostPageState extends State<DetailPostPage> {
                       const SizedBox(height: 12),
 
                       Obx(() {
-                        if (komunitasCommentController.status.value == Status.loading) {
+                        if (komunitasController.commentsStatus.value == Status.loading) {
                           return const PostLoadingCard();
-                        } else if (komunitasCommentController.status.value == Status.success) {
-                          return komunitasCommentController.comments.isNotEmpty
+                        } else if (komunitasController.commentsStatus.value == Status.success) {
+                          return komunitasController.comments.isNotEmpty
                               ? Column(
-                                  children: komunitasCommentController.comments.map((comment) {
+                                  children: komunitasController.comments.map((comment) {
                                     return CommentCard(
                                       user: widget.user,
                                       comment: comment,
@@ -290,7 +305,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
                           content: commentTextController.text,
                         );
 
-                        komunitasCommentController.createComment(comment: comment);
+                        komunitasController.createComment(comment: comment);
                         commentTextController.clear();
                       }
                     },
@@ -327,19 +342,10 @@ class _DetailPostPageState extends State<DetailPostPage> {
   }
 
   void fetchComments() {
-    komunitasCommentController.fetchComments(
+    komunitasController.fetchComments(
       postId: widget.post.id.toString(),
       latest: isLatest,
     );
-  }
-
-  void refreshCommentsCount() {
-    setState(() {
-      (widget.post.comments ?? []).clear();
-      (widget.post.comments ?? []).addAll(
-        komunitasCommentController.comments.map((c) => c.idUser!.id!).toList(),
-      );
-    });
   }
 
   Future<void> handleDeletePost(BuildContext context) {
@@ -357,7 +363,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => komunitasPostController.deletePost(postId: widget.post.id.toString()),
+                  onTap: () => komunitasController.deletePost(postId: widget.post.id.toString()),
                   text: 'Ya, hapus',
                 ),
               ),
@@ -391,7 +397,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
                 child: CustomButton(
                   backgroundColor: dangerMain,
                   pressedColor: dangerPressed,
-                  onTap: () => komunitasReportController.reportPost(
+                  onTap: () => komunitasController.reportPost(
                     uid: widget.user.id.toString(),
                     postId: widget.post.id.toString(),
                   ),
@@ -414,22 +420,21 @@ class _DetailPostPageState extends State<DetailPostPage> {
     );
   }
 
-  void handleLikePost() {
-    setState(() {
-      isLiked = !isLiked;
-      isLiked
-          ? (widget.post.likes ?? []).add(widget.user.id.toString())
-          : (widget.post.likes ?? []).remove(widget.user.id.toString());
-    });
+  void handleLikePost() async {
+    final post = currentPost;
+    final wasLiked = isLiked;
 
-    isLiked
-        ? komunitasPostController.likePost(
-            uid: widget.user.id.toString(),
-            postId: widget.post.id.toString(),
-          )
-        : komunitasPostController.unlikePost(
-            uid: widget.user.id.toString(),
-            postId: widget.post.id.toString(),
-          );
+    // Call controller - it handles both API and local state update
+    if (wasLiked) {
+      await komunitasController.unlikePost(
+        uid: widget.user.id.toString(),
+        postId: post.id.toString(),
+      );
+    } else {
+      await komunitasController.likePost(
+        uid: widget.user.id.toString(),
+        postId: post.id.toString(),
+      );
+    }
   }
 }

@@ -11,7 +11,7 @@ import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/camera.dart';
-import '../../../komunitas/presentation/controllers/komunitas_post_controller.dart';
+import '../../../komunitas/presentation/controllers/komunitas_controller.dart';
 import '../../../komunitas/presentation/widgets/post_card.dart';
 import '../../../riwayat/presentation/controllers/riwayat_history_controller.dart';
 import '../../../riwayat/presentation/controllers/riwayat_scan_controller.dart';
@@ -33,7 +33,7 @@ class _BerandaPageState extends State<BerandaPage> {
   final carouselController = CarouselSliderController();
   int carouselIndex = 0;
 
-  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasController = Get.find<KomunitasController>();
   final riwayatHistoryController = Get.find<RiwayatHistoryController>();
   final riwayatScanController = Get.find<RiwayatScanController>();
 
@@ -44,7 +44,7 @@ class _BerandaPageState extends State<BerandaPage> {
   }
 
   Future<void> fetchData() async {
-    komunitasPostController.fetchAllPosts(max: 3);
+    komunitasController.fetchAllPosts(max: 3);
     riwayatHistoryController.fetchRiwayat(
       uid: widget.user.id.toString(),
       max: 4,
@@ -130,16 +130,16 @@ class _BerandaPageState extends State<BerandaPage> {
                   ),
                 ),
                 Obx(() {
-                  if (komunitasPostController.status.value == Status.loading) {
+                  if (komunitasController.postsStatus.value == Status.loading) {
                     return const BerandaLoadingCard();
-                  } else if (komunitasPostController.status.value ==
+                  } else if (komunitasController.postsStatus.value ==
                       Status.success) {
-                    return komunitasPostController.posts.isNotEmpty
+                    return komunitasController.posts.isNotEmpty
                         ? Column(
                             children: [
                               CarouselSlider(
                                 carouselController: carouselController,
-                                items: komunitasPostController.posts.map((
+                                items: komunitasController.posts.map((
                                   post,
                                 ) {
                                   return PostCard(
@@ -160,7 +160,7 @@ class _BerandaPageState extends State<BerandaPage> {
                               ),
                               const SizedBox(height: 8),
                               DotsIndicator(
-                                dotsCount: komunitasPostController.posts.length,
+                                dotsCount: komunitasController.posts.length,
                                 position: carouselIndex.toDouble(),
                                 decorator: const DotsDecorator(
                                   spacing: EdgeInsets.all(4),

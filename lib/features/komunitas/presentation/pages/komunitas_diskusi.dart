@@ -5,7 +5,7 @@ import '../../../../core/common/custom_dropdown.dart';
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../controllers/komunitas_post_controller.dart';
+import '../controllers/komunitas_controller.dart';
 import '../widgets/create_post_button.dart';
 import '../widgets/post_card.dart';
 
@@ -19,26 +19,39 @@ class KomunitasDiskusi extends StatefulWidget {
 
 class _KomunitasDiskusiState extends State<KomunitasDiskusi> {
   bool isLatest = false;
-  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasController = Get.find<KomunitasController>();
+  final List<Worker> _workers = [];
 
   @override
   void initState() {
     super.initState();
-    fetchDiskusi();
 
-    ever(komunitasPostController.postDeleted, (deleted) {
+    // Defer fetch to after build completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fetchDiskusi();
+    });
+
+    _workers.add(ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         fetchDiskusi();
-        komunitasPostController.postDeleted.value = false;
+        komunitasController.postDeleted.value = false;
       }
-    });
+    }));
 
-    ever(komunitasPostController.postCreated, (created) {
+    _workers.add(ever(komunitasController.postCreated, (created) {
       if (created) {
         fetchDiskusi();
-        komunitasPostController.postCreated.value = false;
+        komunitasController.postCreated.value = false;
       }
-    });
+    }));
+  }
+
+  @override
+  void dispose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -65,7 +78,7 @@ class _KomunitasDiskusiState extends State<KomunitasDiskusi> {
                       onChanged: (filter) {
                         if (isLatest != filter.value) {
                           isLatest = !isLatest;
-                          komunitasPostController.fetchAllPosts(latest: isLatest);
+                          komunitasController.fetchAllPosts(latest: isLatest);
                         }
                       },
                     ),
@@ -75,12 +88,12 @@ class _KomunitasDiskusiState extends State<KomunitasDiskusi> {
                 const SizedBox(height: 8),
 
                 Obx(() {
-                  if (komunitasPostController.status.value == Status.loading) {
+                  if (komunitasController.postsStatus.value == Status.loading) {
                     return const PostLoadingCard();
-                  } else if (komunitasPostController.status.value == Status.success) {
-                    return komunitasPostController.posts.isNotEmpty
+                  } else if (komunitasController.postsStatus.value == Status.success) {
+                    return komunitasController.posts.isNotEmpty
                         ? Column(
-                            children: komunitasPostController.posts.map((post) {
+                            children: komunitasController.posts.map((post) {
                               return PostCard(user: widget.user, post: post);
                             }).toList(),
                           )
@@ -97,6 +110,6 @@ class _KomunitasDiskusiState extends State<KomunitasDiskusi> {
   }
 
   void fetchDiskusi() {
-    komunitasPostController.fetchAllPosts(latest: isLatest);
+    komunitasController.fetchAllPosts(latest: isLatest);
   }
 }

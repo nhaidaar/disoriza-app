@@ -14,7 +14,7 @@ import '../../../../core/enums/status.dart';
 import '../../../../core/utils/camera.dart';
 import '../../../../core/utils/snackbar.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../controllers/komunitas_post_controller.dart';
+import '../controllers/komunitas_controller.dart';
 
 class CreatePostPage extends StatefulWidget {
   final UserModel user;
@@ -27,7 +27,7 @@ class CreatePostPage extends StatefulWidget {
 class _CreatePostPageState extends State<CreatePostPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final komunitasPostController = Get.find<KomunitasPostController>();
+  final komunitasController = Get.find<KomunitasController>();
   Uint8List? image;
 
   bool areFieldsEmpty = true;
@@ -86,11 +86,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
     _titleController.addListener(updateFieldState);
     _descriptionController.addListener(updateFieldState);
 
-    ever(komunitasPostController.postCreated, (created) {
+    ever(komunitasController.postCreated, (created) {
       if (created) {
         Get.back();
         showSnackbar(context, message: 'Postingan berhasil terunggah');
-        komunitasPostController.postCreated.value = false;
+        komunitasController.postCreated.value = false;
       }
     });
   }
@@ -236,14 +236,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
             Container(
               padding: const EdgeInsets.all(20),
               child: Obx(() {
-                if (komunitasPostController.status.value == Status.loading) {
+                if (komunitasController.actionStatus.value == Status.loading) {
                   return const CustomLoadingButton();
                 }
                 return CustomButton(
                   text: 'Posting',
                   disabled: areFieldsEmpty,
                   onTap: () {
-                    komunitasPostController.createPost(
+                    komunitasController.createPost(
                       title: _titleController.text,
                       description: _descriptionController.text,
                       uid: widget.user.id.toString(),

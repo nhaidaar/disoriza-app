@@ -7,9 +7,7 @@ import '../../../../../core/common/fontstyles.dart';
 import '../../../../core/enums/status.dart';
 import '../../../../core/utils/snackbar.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../controllers/komunitas_comment_controller.dart';
-import '../controllers/komunitas_post_controller.dart';
-import '../controllers/komunitas_search_controller.dart';
+import '../controllers/komunitas_controller.dart';
 import 'komunitas_aktivitas.dart';
 import 'komunitas_diskusi.dart';
 import 'search_post_page.dart';
@@ -23,33 +21,56 @@ class KomunitasPage extends StatefulWidget {
 }
 
 class _KomunitasPageState extends State<KomunitasPage> {
-  final komunitasPostController = Get.find<KomunitasPostController>();
-  final komunitasCommentController = Get.find<KomunitasCommentController>();
-  final komunitasSearchController = Get.find<KomunitasSearchController>();
+  final komunitasController = Get.find<KomunitasController>();
+  final List<Worker> _workers = [];
 
   @override
   void initState() {
     super.initState();
-    ever(komunitasPostController.status, (status) {
-      if (status == Status.error && komunitasPostController.errorMessage.value.isNotEmpty) {
-        showSnackbar(context, message: komunitasPostController.errorMessage.value, isError: true);
-        komunitasPostController.errorMessage.value = '';
-      }
-    });
 
-    ever(komunitasCommentController.status, (status) {
-      if (status == Status.error && komunitasCommentController.errorMessage.value.isNotEmpty) {
-        showSnackbar(context, message: komunitasCommentController.errorMessage.value, isError: true);
-        komunitasCommentController.errorMessage.value = '';
+    // Listen for posts errors
+    _workers.add(ever(komunitasController.postsStatus, (status) {
+      if (!mounted) return;
+      if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
+        showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
+        komunitasController.errorMessage.value = '';
       }
-    });
+    }));
 
-    ever(komunitasSearchController.status, (status) {
-      if (status == Status.error && komunitasSearchController.errorMessage.value.isNotEmpty) {
-        showSnackbar(context, message: komunitasSearchController.errorMessage.value, isError: true);
-        komunitasSearchController.errorMessage.value = '';
+    // Listen for comments errors
+    _workers.add(ever(komunitasController.commentsStatus, (status) {
+      if (!mounted) return;
+      if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
+        showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
+        komunitasController.errorMessage.value = '';
       }
-    });
+    }));
+
+    // Listen for search errors
+    _workers.add(ever(komunitasController.searchStatus, (status) {
+      if (!mounted) return;
+      if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
+        showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
+        komunitasController.errorMessage.value = '';
+      }
+    }));
+
+    // Listen for action errors (like, report, etc.)
+    _workers.add(ever(komunitasController.actionStatus, (status) {
+      if (!mounted) return;
+      if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
+        showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
+        komunitasController.errorMessage.value = '';
+      }
+    }));
+  }
+
+  @override
+  void dispose() {
+    for (final worker in _workers) {
+      worker.dispose();
+    }
+    super.dispose();
   }
 
   @override
