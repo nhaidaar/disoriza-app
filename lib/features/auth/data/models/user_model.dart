@@ -29,7 +29,7 @@ class UserModel {
       'email': email,
       'name': name,
       'profile_picture': profilePicture,
-      'isAdmin': isAdmin,
+      'is_admin': isAdmin,
     };
   }
 

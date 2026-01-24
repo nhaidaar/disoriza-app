@@ -16,10 +16,10 @@ class AuthController extends GetxController {
   final RxBool passwordReseted = false.obs;
 
   String _cleanError(dynamic error) {
-    print(error);
+    // Remove exception type prefix from error message
     return error
         .toString()
-        .replaceFirst(RegExp(r'^[A-Za-z]+Exception: '), '')
+        .replaceFirst(RegExp(r'^(Exception: |[A-Za-z]+Exception: )'), '')
         .trim();
   }
 

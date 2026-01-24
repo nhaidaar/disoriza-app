@@ -19,12 +19,22 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
+  final authController = Get.find<AuthController>();
   bool isEmailEmpty = true;
+  Worker? _passwordResetWorker;
 
   @override
   void initState() {
-    _emailController.addListener(updateFieldState);
     super.initState();
+    _emailController.addListener(updateFieldState);
+
+    // Listen for password reset success using GetX worker
+    _passwordResetWorker = ever(authController.passwordReseted, (isReseted) {
+      if (isReseted && mounted) {
+        authController.passwordReseted.value = false;
+        handlePasswordReseted(context);
+      }
+    });
   }
 
   void updateFieldState() {
@@ -33,6 +43,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   void dispose() {
+    _passwordResetWorker?.dispose();
     _emailController.removeListener(updateFieldState);
     _emailController.dispose();
     super.dispose();
@@ -40,8 +51,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
-
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -92,13 +101,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 Obx(() {
                   if (authController.status.value == Status.loading) {
                     return const CustomLoadingButton();
-                  }
-
-                  if (authController.passwordReseted.value) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      authController.passwordReseted.value = false;
-                      handlePasswordReseted(context);
-                    });
                   }
 
                   return CustomButton(

@@ -14,17 +14,16 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Exception, UserModel>> checkSession() async {
     try {
       final user = client.auth.currentSession;
-      if (user == null) return Left(Exception());
+      if (user == null) return Left(Exception('No active session'));
 
       final uid = user.user.id;
       final userModel = await fetchUserModel(uid: uid);
       if (userModel != null) {
-        if (user.user.email != userModel.email) {
-          await client
-              .from('users')
-              .update({'email': user.user.email})
-              .eq('id', uid);
-        }
+        await _syncEmailIfNeeded(
+          uid: uid,
+          authEmail: user.user.email,
+          dbEmail: userModel.email,
+        );
         return Right(userModel);
       }
 
@@ -41,6 +40,17 @@ class AuthRepositoryImpl implements AuthRepository {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Syncs email from auth to users table if they differ.
+  Future<void> _syncEmailIfNeeded({
+    required String uid,
+    required String? authEmail,
+    required String? dbEmail,
+  }) async {
+    if (authEmail != null && authEmail != dbEmail) {
+      await client.from('users').update({'email': authEmail}).eq('id', uid);
     }
   }
 
@@ -78,12 +88,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final uid = session.user!.id;
       final userModel = await fetchUserModel(uid: uid);
       if (userModel != null) {
-        if (session.user?.email != userModel.email) {
-          await client
-              .from('users')
-              .update({'email': session.user?.email})
-              .eq('id', uid);
-        }
+        await _syncEmailIfNeeded(
+          uid: uid,
+          authEmail: session.user?.email,
+          dbEmail: userModel.email,
+        );
         return Right(userModel);
       }
 
@@ -145,8 +154,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final updatedUser = UserModel.fromMap(response);
       return Right(updatedUser);
-      // } on PostgrestException catch (e) {
-      //   return Left(Exception(e.message));
     } on Exception catch (e) {
       return Left(e);
     }
