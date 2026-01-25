@@ -15,7 +15,10 @@ class RiwayatScanController extends GetxController {
   final RxString errorMessage = ''.obs;
 
   String _cleanError(dynamic error) {
-    return error.toString().replaceFirst(RegExp(r'^[A-Za-z]+Exception: '), '').trim();
+    return error
+        .toString()
+        .replaceFirst(RegExp(r'^[A-Za-z]*Exception: '), '')
+        .trim();
   }
 
   Future<void> scanDisease({required String uid, required XFile image}) async {

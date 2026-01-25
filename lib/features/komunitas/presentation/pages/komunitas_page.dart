@@ -80,10 +80,10 @@ class _KomunitasPageState extends State<KomunitasPage> {
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 128,
-          backgroundColor: neutral10,
-          surfaceTintColor: neutral10,
-          shape: const Border(
-            bottom: BorderSide(color: neutral30),
+          backgroundColor: context.neutral10,
+          surfaceTintColor: context.neutral10,
+          shape: Border(
+            bottom: BorderSide(color: context.neutral30),
           ),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +93,7 @@ class _KomunitasPageState extends State<KomunitasPage> {
                 children: [
                   Text(
                     'Komunitas',
-                    style: mediumTS.copyWith(color: neutral100),
+                    style: mediumTS.copyWith(color: context.neutral100),
                   ),
 
                   IconButton(
@@ -109,13 +109,13 @@ class _KomunitasPageState extends State<KomunitasPage> {
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(100),
-                  color: backgroundCanvas,
+                  color: context.backgroundCanvas,
                 ),
                 child: TabBar(
-                  labelStyle: mediumTS.copyWith(fontSize: 16, color: accentGreenMain),
-                  unselectedLabelStyle: mediumTS.copyWith(fontSize: 16, color: neutral60),
+                  labelStyle: mediumTS.copyWith(fontSize: 16, color: context.accentGreen),
+                  unselectedLabelStyle: mediumTS.copyWith(fontSize: 16, color: context.neutral60),
                   indicator: BoxDecoration(
-                    color: neutral10,
+                    color: context.neutral10,
                     borderRadius: BorderRadius.circular(100),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,

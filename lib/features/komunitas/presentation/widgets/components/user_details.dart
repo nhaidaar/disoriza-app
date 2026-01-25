@@ -40,7 +40,7 @@ class UserDetails extends StatelessWidget {
                   Flexible(
                     child: Text(
                       name,
-                      style: mediumTS.copyWith(color: neutral100),
+                      style: mediumTS.copyWith(color: context.neutral100),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -54,7 +54,7 @@ class UserDetails extends StatelessWidget {
                 children: [
                   Text(
                     formatTimeAgo(date),
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral60),
+                    style: mediumTS.copyWith(fontSize: 12, color: context.neutral60),
                   ),
                   if (canViewReport) ...[
                     const Padding(
@@ -63,7 +63,7 @@ class UserDetails extends StatelessWidget {
                     ),
                     Text(
                       'Dilaporkan oleh $reports orang',
-                      style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                      style: mediumTS.copyWith(fontSize: 12, color: context.neutral80),
                     )
                   ]
                 ],

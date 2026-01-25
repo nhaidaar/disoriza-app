@@ -29,8 +29,8 @@ class ReportedPostCard extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: defaultSmoothRadius,
-          border: Border.all(color: neutral30),
-          color: neutral10,
+          border: Border.all(color: context.neutral30),
+          color: context.neutral10,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,7 +46,7 @@ class ReportedPostCard extends StatelessWidget {
 
             Text(
               post.title.toString(),
-              style: semiboldTS.copyWith(fontSize: 16, color: neutral100),
+              style: semiboldTS.copyWith(fontSize: 16, color: context.neutral100),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -55,7 +55,7 @@ class ReportedPostCard extends StatelessWidget {
 
             Text(
               post.content.toString(),
-              style: mediumTS.copyWith(color: neutral90),
+              style: mediumTS.copyWith(color: context.neutral90),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -74,7 +74,7 @@ class ReportedPostCard extends StatelessWidget {
 
             Text(
               'Dilaporkan oleh ${post.reports?.length} orang',
-              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+              style: mediumTS.copyWith(fontSize: 12, color: context.neutral80),
             )
           ],
         ),

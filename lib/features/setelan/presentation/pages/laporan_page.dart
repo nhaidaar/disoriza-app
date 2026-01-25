@@ -50,10 +50,10 @@ class _LaporanPageState extends State<LaporanPage> {
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 128,
-          backgroundColor: neutral10,
-          surfaceTintColor: neutral10,
-          shape: const Border(
-            bottom: BorderSide(color: neutral30),
+          backgroundColor: context.neutral10,
+          surfaceTintColor: context.neutral10,
+          shape: Border(
+            bottom: BorderSide(color: context.neutral30),
           ),
 
           leading: GestureDetector(
@@ -63,7 +63,7 @@ class _LaporanPageState extends State<LaporanPage> {
 
           title: Text(
             'Laporan',
-            style: mediumTS.copyWith(color: neutral100),
+            style: mediumTS.copyWith(color: context.neutral100),
           ),
           centerTitle: true,
 
@@ -74,13 +74,13 @@ class _LaporanPageState extends State<LaporanPage> {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
-                color: backgroundCanvas,
+                color: context.backgroundCanvas,
               ),
               child: TabBar(
-                labelStyle: mediumTS.copyWith(fontSize: 16, color: accentGreenMain),
-                unselectedLabelStyle: mediumTS.copyWith(fontSize: 16, color: neutral60),
+                labelStyle: mediumTS.copyWith(fontSize: 16, color: context.accentGreen),
+                unselectedLabelStyle: mediumTS.copyWith(fontSize: 16, color: context.neutral60),
                 indicator: BoxDecoration(
-                  color: neutral10,
+                  color: context.neutral10,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,

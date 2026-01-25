@@ -106,7 +106,9 @@ class AuthController extends GetxController {
         },
         (success) {
           user.value = null;
-          status.value = Status.initial;
+          // Use Status.success so _AuthWrapper shows AuthPage (user is null)
+          // Status.initial would show SplashScreen
+          status.value = Status.success;
         },
       );
     } catch (_) {

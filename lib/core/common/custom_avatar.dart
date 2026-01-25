@@ -13,12 +13,12 @@ class CustomAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: radius,
-      backgroundColor: neutral10,
+      backgroundColor: context.neutral10,
       backgroundImage: link != null ? getImageProvider(link.toString()) : null,
       child: link == null
           ? Icon(
               IconsaxPlusLinear.profile,
-              color: neutral100,
+              color: context.neutral100,
               size: radius * 1.2,
             )
           : null,

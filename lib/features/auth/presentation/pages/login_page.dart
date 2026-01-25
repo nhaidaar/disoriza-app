@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Email', style: mediumTS.copyWith(color: neutral100)),
+          Text('Email', style: mediumTS.copyWith(color: context.neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
             controller: _emailController,
@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
 
           const SizedBox(height: 12),
 
-          Text('Password', style: mediumTS.copyWith(color: neutral100)),
+          Text('Password', style: mediumTS.copyWith(color: context.neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
             controller: _passwordController,
@@ -86,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                 onTap: () => Get.to(() => const ForgotPasswordPage()),
                 child: Text(
                   'Lupa password?',
-                  style: mediumTS.copyWith(color: neutral100),
+                  style: mediumTS.copyWith(color: context.neutral100),
                 ),
               ),
             ],

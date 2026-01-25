@@ -52,11 +52,9 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 80,
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
-        ),
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(bottom: BorderSide(color: context.neutral30)),
 
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -94,7 +92,7 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     borderRadius: defaultSmoothRadius,
-                    color: neutral10,
+                    color: context.neutral10,
                   ),
                   child: Row(
                     children: [
@@ -103,12 +101,15 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
                         children: [
                           Text(
                             'Jenis penyakit',
-                            style: mediumTS.copyWith(color: neutral70),
+                            style: mediumTS.copyWith(color: context.neutral70),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             widget.riwayat.idDisease!.name.toString(),
-                            style: mediumTS.copyWith(fontSize: 18, color: neutral100),
+                            style: mediumTS.copyWith(
+                              fontSize: 18,
+                              color: context.neutral100,
+                            ),
                           ),
                         ],
                       ),
@@ -129,15 +130,15 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
                             color: Colors.orange,
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             IconsaxPlusBold.scan,
-                            color: neutral10,
+                            color: context.neutral10,
                           ),
                         ),
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -164,7 +165,8 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
                   index: -1,
                   controller: _scrollController,
                   title: 'Akurasi',
-                  content: '${((widget.riwayat.accuracy ?? 0) * 100).toStringAsFixed(2)} %',
+                  content:
+                      '${((widget.riwayat.accuracy ?? 0) * 100).toStringAsFixed(2)} %',
                 ),
               ),
             ],
@@ -207,8 +209,8 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(1000),
-          border: Border.all(color: neutral30),
-          color: neutral10,
+          border: Border.all(color: context.neutral30),
+          color: context.neutral10,
           boxShadow: const [shadowEffect1],
         ),
         child: Row(
@@ -250,16 +252,16 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
-                  onTap: () => riwayatHistoryController.deleteRiwayat(riwayatId: widget.riwayat.id.toString()),
+                  onTap: () => riwayatHistoryController.deleteRiwayat(
+                    riwayatId: widget.riwayat.id.toString(),
+                  ),
                   text: 'Ya, hapus',
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),
@@ -276,7 +278,8 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
     final double screenTriggerOffset = viewportHeight * 0.3;
 
     for (int i = 0; i < 3; i++) {
-      final RenderObject? renderObject = _scrollController.tagMap[i]?.context.findRenderObject();
+      final RenderObject? renderObject = _scrollController.tagMap[i]?.context
+          .findRenderObject();
 
       if (renderObject is RenderBox) {
         final position = renderObject.localToGlobal(Offset.zero);
@@ -284,7 +287,8 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
 
         if (itemOffset <= screenTriggerOffset) {
           if (i == 2 ||
-              (_scrollController.tagMap[i + 1]?.context.findRenderObject() as RenderBox?)!
+              (_scrollController.tagMap[i + 1]?.context.findRenderObject()
+                          as RenderBox?)!
                       .localToGlobal(Offset.zero)
                       .dy >
                   screenTriggerOffset) {
@@ -302,7 +306,10 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
     final double viewportHeight = _scrollController.position.viewportDimension;
     final double offset = viewportHeight * 0.15;
 
-    await _scrollController.scrollToIndex(index, preferPosition: AutoScrollPosition.begin);
+    await _scrollController.scrollToIndex(
+      index,
+      preferPosition: AutoScrollPosition.begin,
+    );
 
     final targetContext = _scrollController.tagMap[index]?.context;
     if (targetContext != null) {

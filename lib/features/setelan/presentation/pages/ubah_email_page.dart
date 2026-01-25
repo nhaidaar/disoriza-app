@@ -57,25 +57,25 @@ class _UbahEmailPageState extends State<UbahEmailPage> {
           onTap: () => Get.back(),
           child: const Icon(IconsaxPlusLinear.arrow_left),
         ),
-        backgroundColor: neutral10,
+        backgroundColor: context.neutral10,
       ),
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            color: neutral10,
+            color: context.neutral10,
             child: Column(
               children: [
                 Text(
                   'Ubah email',
-                  style: mediumTS.copyWith(fontSize: 24, color: neutral100),
+                  style: mediumTS.copyWith(fontSize: 24, color: context.neutral100),
                 ),
 
                 const SizedBox(height: 16),
 
                 Text(
                   'Masukkan email baru Anda untuk mendapatkan link konfirmasi ubah email.',
-                  style: mediumTS.copyWith(color: neutral100.withValues(alpha: 0.6)),
+                  style: mediumTS.copyWith(color: context.neutral100.withValues(alpha: 0.6)),
                   textAlign: TextAlign.center,
                 )
               ],
@@ -119,14 +119,14 @@ class _UbahEmailPageState extends State<UbahEmailPage> {
   void handleUbahEmail(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => CustomPopup(
+      builder: (dialogContext) => CustomPopup(
         icon: IconsaxPlusBold.tick_circle,
-        iconColor: accentGreenMain,
+        iconColor: context.accentGreen,
         title: 'Email terkirim!',
         subtitle: 'Kami telah mengirimkan konfirmasi ubah email ke ${_emailController.text}',
         actions: [
           CustomButton(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () => Navigator.of(dialogContext).pop(),
             text: 'Oke',
           ),
         ],

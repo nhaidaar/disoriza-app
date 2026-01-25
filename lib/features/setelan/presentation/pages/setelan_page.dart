@@ -7,7 +7,7 @@ import '../../../../core/common/colors.dart';
 import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/fontstyles.dart';
-import '../../../../core/enums/status.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../controllers/setelan_controller.dart';
 import '../widgets/setelan_menu.dart';
@@ -27,29 +27,18 @@ class SetelanPage extends StatefulWidget {
 class _SetelanPageState extends State<SetelanPage> {
   final authController = Get.find<AuthController>();
   final setelanController = Get.find<SetelanController>();
-
-  @override
-  void initState() {
-    super.initState();
-    ever(authController.status, (status) {
-      if (status == Status.initial && authController.user.value == null) {
-        Get.back();
-      }
-    });
-  }
+  final themeController = Get.find<ThemeController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
-        ),
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(bottom: BorderSide(color: context.neutral30)),
         title: Text(
           'Setelan',
-          style: mediumTS.copyWith(color: neutral100),
+          style: mediumTS.copyWith(color: context.neutral100),
         ),
       ),
       body: ListView(
@@ -84,6 +73,21 @@ class _SetelanPageState extends State<SetelanPage> {
             onTap: () => Get.to(() => UbahPasswordPage(user: widget.user)),
           ),
 
+          const SizedBox(height: 16),
+
+          Obx(
+            () => SetelanMenu(
+              icon: IconsaxPlusLinear.moon,
+              title: 'Tema',
+              subtitle: themeController.getThemeLabel(
+                themeController.themeMode.value,
+              ),
+              onTap: () => _showThemePicker(context),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           SetelanMenu(
             icon: IconsaxPlusLinear.logout,
             iconColor: dangerMain,
@@ -110,24 +114,64 @@ class _SetelanPageState extends State<SetelanPage> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
                   text: 'Ya, keluar',
-                  onTap: () => authController.logout(),
+                  onTap: () {
+                    authController.logout();
+                    Navigator.of(context).pop();
+                  },
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
+                  textColor: context.neutral100,
+                  borderColor: context.neutral30,
                   text: 'Batal',
                   onTap: () => Navigator.of(context).pop(),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
+    );
+  }
+
+  void _showThemePicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => CustomPopup(
+        icon: IconsaxPlusLinear.moon,
+        iconColor: context.accentGreen,
+        title: 'Pilih Tema',
+        actions: [
+          Column(
+            children: [
+              _buildThemeOption(dialogContext, 'Sistem', ThemeMode.system),
+              const SizedBox(height: 8),
+              _buildThemeOption(dialogContext, 'Terang', ThemeMode.light),
+              const SizedBox(height: 8),
+              _buildThemeOption(dialogContext, 'Gelap', ThemeMode.dark),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(BuildContext context, String label, ThemeMode mode) {
+    final isSelected = themeController.themeMode.value == mode;
+
+    return CustomButton(
+      onTap: () {
+        themeController.setThemeMode(mode);
+        Navigator.of(context).pop();
+      },
+      text: label,
+      textColor: isSelected ? context.neutral10 : context.neutral100,
+      borderColor: isSelected ? null : context.neutral30,
+      backgroundColor: isSelected ? context.accentGreen : context.neutral10,
     );
   }
 }

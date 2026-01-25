@@ -24,11 +24,7 @@ import '../widgets/post_card.dart';
 class DetailPostPage extends StatefulWidget {
   final UserModel user;
   final PostModel post;
-  const DetailPostPage({
-    super.key,
-    required this.user,
-    required this.post,
-  });
+  const DetailPostPage({super.key, required this.user, required this.post});
 
   @override
   State<DetailPostPage> createState() => _DetailPostPageState();
@@ -46,15 +42,21 @@ class _DetailPostPageState extends State<DetailPostPage> {
     final postId = widget.post.id;
 
     // Check posts list first
-    final inPosts = komunitasController.posts.firstWhereOrNull((p) => p.id == postId);
+    final inPosts = komunitasController.posts.firstWhereOrNull(
+      (p) => p.id == postId,
+    );
     if (inPosts != null) return inPosts;
 
     // Check search results
-    final inSearch = komunitasController.searchResults.firstWhereOrNull((p) => p.id == postId);
+    final inSearch = komunitasController.searchResults.firstWhereOrNull(
+      (p) => p.id == postId,
+    );
     if (inSearch != null) return inSearch;
 
     // Check reported posts
-    final inReported = komunitasController.reportedPosts.firstWhereOrNull((p) => p.id == postId);
+    final inReported = komunitasController.reportedPosts.firstWhereOrNull(
+      (p) => p.id == postId,
+    );
     if (inReported != null) return inReported;
 
     // Fall back to widget.post
@@ -107,11 +109,9 @@ class _DetailPostPageState extends State<DetailPostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
-        ),
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(bottom: BorderSide(color: context.neutral30)),
 
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -120,7 +120,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
 
         title: Text(
           'Detail diskusi',
-          style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+          style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
         ),
         centerTitle: true,
 
@@ -132,7 +132,10 @@ class _DetailPostPageState extends State<DetailPostPage> {
                 )
               : IconButton(
                   onPressed: () => handleReportPost(context),
-                  icon: const Icon(IconsaxPlusLinear.info_circle, color: neutral100),
+                  icon: Icon(
+                    IconsaxPlusLinear.info_circle,
+                    color: context.neutral100,
+                  ),
                 ),
         ],
       ),
@@ -149,19 +152,23 @@ class _DetailPostPageState extends State<DetailPostPage> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: defaultSmoothRadius,
-                    border: Border.all(color: neutral30),
-                    color: neutral10,
+                    border: Border.all(color: context.neutral30),
+                    color: context.neutral10,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       UserDetails(
-                        name: widget.post.author != null ? widget.post.author!.name.toString() : 'Disoriza User',
+                        name: widget.post.author != null
+                            ? widget.post.author!.name.toString()
+                            : 'Disoriza User',
                         isAdmin: widget.post.author?.isAdmin ?? false,
                         profilePicture: widget.post.author?.profilePicture,
                         date: widget.post.date,
 
-                        canViewReport: widget.user.isAdmin && (widget.post.reports ?? []).isNotEmpty,
+                        canViewReport:
+                            widget.user.isAdmin &&
+                            (widget.post.reports ?? []).isNotEmpty,
                         reports: widget.post.reports?.length,
                       ),
 
@@ -169,14 +176,17 @@ class _DetailPostPageState extends State<DetailPostPage> {
 
                       Text(
                         widget.post.title.toString(),
-                        style: semiboldTS.copyWith(fontSize: 16, color: neutral100),
+                        style: semiboldTS.copyWith(
+                          fontSize: 16,
+                          color: context.neutral100,
+                        ),
                       ),
 
                       const SizedBox(height: 4),
 
                       Text(
                         widget.post.content.toString(),
-                        style: mediumTS.copyWith(color: neutral90),
+                        style: mediumTS.copyWith(color: context.neutral90),
                       ),
 
                       const SizedBox(height: 4),
@@ -201,28 +211,36 @@ class _DetailPostPageState extends State<DetailPostPage> {
                             GestureDetector(
                               onTap: () => handleLikePost(),
                               child: Icon(
-                                liked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
-                                color: liked ? dangerMain : neutral100,
+                                liked
+                                    ? IconsaxPlusBold.heart
+                                    : IconsaxPlusLinear.heart,
+                                color: liked ? dangerMain : context.neutral100,
                                 size: 20,
                               ),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               post.likesCount.toString(),
-                              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                              style: mediumTS.copyWith(
+                                fontSize: 12,
+                                color: context.neutral80,
+                              ),
                             ),
 
                             const SizedBox(width: 16),
 
-                            const Icon(
+                            Icon(
                               IconsaxPlusLinear.message_text_1,
-                              color: neutral100,
+                              color: context.neutral100,
                               size: 20,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               post.commentsCount.toString(),
-                              style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                              style: mediumTS.copyWith(
+                                fontSize: 12,
+                                color: context.neutral80,
+                              ),
                             ),
                           ],
                         );
@@ -230,13 +248,16 @@ class _DetailPostPageState extends State<DetailPostPage> {
 
                       const SizedBox(height: 12),
 
-                      const Divider(thickness: 1, color: neutral30),
+                      Divider(thickness: 1, color: context.neutral30),
 
                       Row(
                         children: [
                           Text(
                             'Komentar',
-                            style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+                            style: mediumTS.copyWith(
+                              fontSize: 16,
+                              color: context.neutral100,
+                            ),
                           ),
                           const Spacer(),
                           CustomDropdown(
@@ -261,12 +282,16 @@ class _DetailPostPageState extends State<DetailPostPage> {
                       const SizedBox(height: 12),
 
                       Obx(() {
-                        if (komunitasController.commentsStatus.value == Status.loading) {
+                        if (komunitasController.commentsStatus.value ==
+                            Status.loading) {
                           return const PostLoadingCard();
-                        } else if (komunitasController.commentsStatus.value == Status.success) {
+                        } else if (komunitasController.commentsStatus.value ==
+                            Status.success) {
                           return komunitasController.comments.isNotEmpty
                               ? Column(
-                                  children: komunitasController.comments.map((comment) {
+                                  children: komunitasController.comments.map((
+                                    comment,
+                                  ) {
                                     return CommentCard(
                                       user: widget.user,
                                       comment: comment,
@@ -284,16 +309,18 @@ class _DetailPostPageState extends State<DetailPostPage> {
             ),
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                border: Border.symmetric(horizontal: BorderSide(color: neutral30)),
-                color: neutral10,
+              decoration: BoxDecoration(
+                border: Border.symmetric(
+                  horizontal: BorderSide(color: context.neutral30),
+                ),
+                color: context.neutral10,
               ),
               child: Stack(
                 alignment: Alignment.centerRight,
                 children: [
                   CustomFormField(
                     controller: commentTextController,
-                    backgroundColor: backgroundCanvas,
+                    backgroundColor: context.backgroundCanvas,
                     hint: 'Berikan komentar',
                   ),
                   IconButton(
@@ -362,16 +389,16 @@ class _DetailPostPageState extends State<DetailPostPage> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
-                  onTap: () => komunitasController.deletePost(postId: widget.post.id.toString()),
+                  onTap: () => komunitasController.deletePost(
+                    postId: widget.post.id.toString(),
+                  ),
                   text: 'Ya, hapus',
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),
@@ -396,7 +423,6 @@ class _DetailPostPageState extends State<DetailPostPage> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
                   onTap: () => komunitasController.reportPost(
                     uid: widget.user.id.toString(),
                     postId: widget.post.id.toString(),
@@ -407,8 +433,7 @@ class _DetailPostPageState extends State<DetailPostPage> {
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),

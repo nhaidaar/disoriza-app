@@ -24,7 +24,7 @@ class CustomFormField extends StatelessWidget {
     this.controller,
     this.focusNode,
     this.keyboardType,
-    this.backgroundColor = neutral10,
+    this.backgroundColor,
     this.prefixIcon,
     this.prefixIconColor,
     this.obscureText = false,
@@ -47,12 +47,12 @@ class CustomFormField extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         obscureText: obscureText,
-        style: mediumTS.copyWith(fontSize: 14, color: isEnabled ? neutral100 : neutral80),
+        style: mediumTS.copyWith(fontSize: 14, color: isEnabled ? context.neutral100 : context.neutral80),
         maxLines: maxLines,
         decoration: InputDecoration(
           enabled: isEnabled,
           filled: true,
-          fillColor: backgroundColor,
+          fillColor: backgroundColor ?? context.neutral10,
           prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: prefixIconColor) : null,
           suffixIcon: isPassword
               ? GestureDetector(
@@ -61,7 +61,7 @@ class CustomFormField extends StatelessWidget {
                 )
               : null,
           hintText: hint,
-          hintStyle: mediumTS.copyWith(fontSize: 14, color: neutral60),
+          hintStyle: mediumTS.copyWith(fontSize: 14, color: context.neutral60),
           contentPadding: const EdgeInsets.all(16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(borderradius),

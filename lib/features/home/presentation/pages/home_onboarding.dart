@@ -22,7 +22,7 @@ class HomeOnboarding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: neutral10,
+      backgroundColor: context.neutral10,
       body: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(
@@ -36,11 +36,11 @@ class HomeOnboarding extends StatelessWidget {
             RichText(
               text: TextSpan(
                 text: 'Hai Naufal, Yuk mulai pemindaian pertamamu menggunakan ',
-                style: mediumTS.copyWith(fontSize: 24, color: neutral100),
+                style: mediumTS.copyWith(fontSize: 24, color: context.neutral100),
                 children: [
                   TextSpan(
                     text: 'Disoriza AI ✨',
-                    style: mediumTS.copyWith(fontSize: 24, color: accentGreenMain),
+                    style: mediumTS.copyWith(fontSize: 24, color: context.accentGreen),
                   )
                 ],
               ),
@@ -50,7 +50,7 @@ class HomeOnboarding extends StatelessWidget {
 
             Text(
               'Ayo coba fitur pindai yang dimiliki aplikasi ini untuk mengetahui penyakit pada padi Anda.',
-              style: mediumTS.copyWith(color: neutral70),
+              style: mediumTS.copyWith(color: context.neutral70),
             ),
 
             const SizedBox(height: 24),
@@ -68,7 +68,7 @@ class HomeOnboarding extends StatelessWidget {
               child: Center(
                 child: Text(
                   'Lewati',
-                  style: mediumTS.copyWith(color: neutral70),
+                  style: mediumTS.copyWith(color: context.neutral70),
                 ),
               ),
             )

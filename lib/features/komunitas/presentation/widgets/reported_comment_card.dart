@@ -30,8 +30,8 @@ class ReportedCommentCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: defaultSmoothRadius,
-        border: Border.all(color: neutral30),
-        color: neutral10,
+        border: Border.all(color: context.neutral30),
+        color: context.neutral10,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,14 +45,14 @@ class ReportedCommentCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             comment.content.toString(),
-            style: mediumTS.copyWith(color: neutral90),
+            style: mediumTS.copyWith(color: context.neutral90),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
               Text(
                 'Dilaporkan oleh ${comment.reports?.length} orang',
-                style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                style: mediumTS.copyWith(fontSize: 12, color: context.neutral80),
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),

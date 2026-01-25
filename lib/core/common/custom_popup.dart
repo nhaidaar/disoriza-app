@@ -31,14 +31,14 @@ class CustomPopup extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: defaultSmoothRadius,
       ),
-      backgroundColor: neutral10,
-      surfaceTintColor: neutral10,
+      backgroundColor: context.neutral10,
+      surfaceTintColor: context.neutral10,
       titlePadding: const EdgeInsets.all(12),
       title: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: defaultSmoothRadius,
-          color: backgroundCanvas,
+          color: context.backgroundCanvas,
         ),
         child: Column(
           children: [
@@ -55,7 +55,7 @@ class CustomPopup extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: mediumTS.copyWith(fontSize: 18, color: neutral100),
+              style: mediumTS.copyWith(fontSize: 18, color: context.neutral100),
             ),
 
             if (subtitle != null) ...[
@@ -65,7 +65,7 @@ class CustomPopup extends StatelessWidget {
               Text(
                 subtitle.toString(),
                 textAlign: TextAlign.center,
-                style: mediumTS.copyWith(fontSize: 14, color: neutral90),
+                style: mediumTS.copyWith(fontSize: 14, color: context.neutral90),
               ),
             ],
 

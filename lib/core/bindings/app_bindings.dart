@@ -5,6 +5,7 @@ import '../../features/auth/presentation/controllers/auth_binding.dart';
 import '../../features/komunitas/presentation/controllers/komunitas_binding.dart';
 import '../../features/riwayat/presentation/controllers/riwayat_binding.dart';
 import '../../features/setelan/presentation/controllers/setelan_binding.dart';
+import '../theme/theme_controller.dart';
 
 /// Main application bindings that orchestrates all feature bindings.
 ///
@@ -23,6 +24,9 @@ class AppBindings extends Bindings {
 
   @override
   void dependencies() {
+    // Theme controller - must be initialized first for theme to apply immediately
+    Get.put<ThemeController>(ThemeController(), permanent: true);
+
     // Auth - must be initialized first and persist throughout app lifecycle
     AuthBinding(client: client).dependencies();
 

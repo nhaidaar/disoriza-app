@@ -34,7 +34,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   void updateFieldState() {
     setState(() {
-      areFieldsEmpty = _titleController.text.isEmpty || _descriptionController.text.isEmpty;
+      areFieldsEmpty =
+          _titleController.text.isEmpty || _descriptionController.text.isEmpty;
     });
   }
 
@@ -58,7 +59,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     onTap: () => Navigator.of(context).pop(true),
                     text: 'Ya, Batalkan',
                     backgroundColor: dangerMain,
-                    pressedColor: dangerPressed,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -66,8 +66,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   child: CustomButton(
                     onTap: () => Navigator.of(context).pop(false),
                     text: 'Tidak, lanjut',
-                    backgroundColor: neutral10,
-                    pressedColor: neutral50,
+                    backgroundColor: context.neutral10,
+                    borderColor: context.neutral50,
                   ),
                 ),
               ],
@@ -115,11 +115,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: neutral10,
-          surfaceTintColor: neutral10,
-          shape: const Border(
-            bottom: BorderSide(color: neutral30),
-          ),
+          backgroundColor: context.neutral10,
+          surfaceTintColor: context.neutral10,
+          shape: Border(bottom: BorderSide(color: context.neutral30)),
 
           leading: IconButton(
             onPressed: () async {
@@ -132,7 +130,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
           title: Text(
             'Buat postingan',
-            style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+            style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
           ),
           centerTitle: true,
         ),
@@ -144,7 +142,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 children: [
                   Text(
                     'Judul',
-                    style: mediumTS.copyWith(color: neutral100),
+                    style: mediumTS.copyWith(color: context.neutral100),
                   ),
                   const SizedBox(height: 8),
                   CustomFormField(
@@ -156,7 +154,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
                   Text(
                     'Deskripsi',
-                    style: mediumTS.copyWith(color: neutral100),
+                    style: mediumTS.copyWith(color: context.neutral100),
                   ),
                   const SizedBox(height: 8),
                   CustomFormField(
@@ -170,14 +168,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
                   Text(
                     'Foto (Opsional)',
-                    style: mediumTS.copyWith(color: neutral100),
+                    style: mediumTS.copyWith(color: context.neutral100),
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: neutral10,
+                      color: context.neutral10,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -185,10 +186,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         Container(
                           height: image != null ? 212 : 141,
                           decoration: BoxDecoration(
-                            border: Border.all(color: neutral30),
+                            border: Border.all(color: context.neutral30),
                             borderRadius: BorderRadius.circular(24),
                             image: image != null
-                                ? DecorationImage(image: MemoryImage(image!), fit: BoxFit.cover)
+                                ? DecorationImage(
+                                    image: MemoryImage(image!),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                           child: image != null
@@ -196,7 +200,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               : Center(
                                   child: Text(
                                     'Silahkan upload gambar\nterlebih dahulu',
-                                    style: mediumTS.copyWith(fontSize: 12, color: neutral70),
+                                    style: mediumTS.copyWith(
+                                      fontSize: 12,
+                                      color: context.neutral70,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -208,7 +215,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           onTap: () async {
                             XFile? pickedImage = await pickImage(context);
                             if (pickedImage != null) {
-                              final imageBytes = await pickedImage.readAsBytes();
+                              final imageBytes = await pickedImage
+                                  .readAsBytes();
                               setState(() => image = imageBytes);
                             }
                           },
@@ -216,12 +224,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              border: Border.all(color: neutral30),
+                              border: Border.all(color: context.neutral30),
                               borderRadius: BorderRadius.circular(24),
                             ),
                             child: Text(
                               image != null ? 'Ubah Gambar' : 'Upload Gambar',
-                              style: mediumTS.copyWith(fontSize: 12, color: neutral100),
+                              style: mediumTS.copyWith(
+                                fontSize: 12,
+                                color: context.neutral100,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),

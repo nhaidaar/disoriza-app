@@ -57,8 +57,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     ever(riwayatHistoryController.status, (status) {
-      if (status == Status.error && riwayatHistoryController.errorMessage.value.isNotEmpty) {
-        showSnackbar(context, message: riwayatHistoryController.errorMessage.value, isError: true);
+      if (status == Status.error &&
+          riwayatHistoryController.errorMessage.value.isNotEmpty) {
+        showSnackbar(
+          context,
+          message: riwayatHistoryController.errorMessage.value,
+          isError: true,
+        );
         riwayatHistoryController.errorMessage.value = '';
       }
     });
@@ -66,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ever(riwayatScanController.status, (status) {
       if (status == Status.loading) {
         showDiseaseLoading(context);
-      } else if (status == Status.error && riwayatScanController.errorMessage.value.isNotEmpty) {
+      } else if (status == Status.error &&
+          riwayatScanController.errorMessage.value.isNotEmpty) {
         Navigator.of(context).pop();
         showDiseaseError(
           context,
@@ -99,9 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: Container(
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: const BoxDecoration(
-          color: neutral10,
-          border: Border(top: BorderSide(color: neutral30)),
+        decoration: BoxDecoration(
+          color: context.neutral10,
+          border: Border(top: BorderSide(color: context.neutral30)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,10 +136,10 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: GestureDetector(
                 onTap: () async => await handleScanDisease(context),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 26,
                   backgroundColor: accentOrangeMain,
-                  child: Icon(IconsaxPlusBold.scan, color: neutral10),
+                  child: Icon(IconsaxPlusBold.scan, color: context.neutral10),
                 ),
               ),
             ),
@@ -173,7 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void handleDiseaseSuccess(BuildContext context) {
     final riwayatModel = riwayatScanController.latestScan.value;
     riwayatModel != null
-        ? Get.to(() => RiwayatDetail(riwayat: riwayatModel))?.then((_) => fetchRiwayats())
+        ? Get.to(
+            () => RiwayatDetail(riwayat: riwayatModel),
+          )?.then((_) => fetchRiwayats())
         : showDiseaseSehat(
             context,
             onScan: () {
@@ -220,16 +228,16 @@ class NavItem extends StatelessWidget {
             const SizedBox(height: 6),
             Icon(
               selected ? activeIcon : icon,
-              color: selected ? accentGreenMain : neutral70,
+              color: selected ? context.accentGreen : context.neutral70,
             ),
             const SizedBox(height: 6),
             Text(
               title,
               style: mediumTS.copyWith(
                 fontSize: 12,
-                color: selected ? accentGreenMain : neutral70,
+                color: selected ? context.accentGreen : context.neutral70,
               ),
-            )
+            ),
           ],
         ),
       ),

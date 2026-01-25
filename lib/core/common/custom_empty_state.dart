@@ -18,12 +18,12 @@ class CustomEmptyState extends StatelessWidget {
           Icon(
             icon,
             size: 28,
-            color: neutral60,
+            color: context.neutral60,
           ),
           const SizedBox(height: 8),
           Text(
             text,
-            style: mediumTS.copyWith(color: neutral60),
+            style: mediumTS.copyWith(color: context.neutral60),
             textAlign: TextAlign.center,
           ),
         ],

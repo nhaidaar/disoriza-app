@@ -22,7 +22,7 @@ class RiwayatCard extends StatelessWidget {
       child: Container(
         width: MediaQuery.of(context).size.width / 2 - 24,
         decoration: BoxDecoration(
-          color: neutral10,
+          color: context.neutral10,
           borderRadius: defaultSmoothRadius,
           boxShadow: const [shadowEffect1],
         ),
@@ -51,16 +51,19 @@ class RiwayatCard extends StatelessWidget {
                 children: [
                   Text(
                     riwayatModel.idDisease!.name.toString(),
-                    style: mediumTS.copyWith(color: neutral100),
+                    style: mediumTS.copyWith(color: context.neutral100),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     formatTimeAgo(riwayatModel.date),
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral70),
+                    style: mediumTS.copyWith(
+                      fontSize: 12,
+                      color: context.neutral70,
+                    ),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -81,6 +84,10 @@ class RiwayatLoadingCard extends StatelessWidget {
           height: 160,
           width: MediaQuery.of(context).size.width / 2 - 24,
           borderRadius: BorderRadius.circular(16),
+          cardLoadingTheme: CardLoadingTheme(
+            colorOne: context.neutral30,
+            colorTwo: context.neutral40,
+          ),
         );
       }),
     );

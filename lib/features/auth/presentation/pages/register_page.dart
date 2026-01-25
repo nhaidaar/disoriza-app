@@ -57,7 +57,7 @@ class _RegisterPageState extends State<RegisterPage> {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Nama', style: mediumTS.copyWith(color: neutral100)),
+          Text('Nama', style: mediumTS.copyWith(color: context.neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
             controller: _namaController,
@@ -66,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 12),
 
-          Text('Email', style: mediumTS.copyWith(color: neutral100)),
+          Text('Email', style: mediumTS.copyWith(color: context.neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
             controller: _emailController,
@@ -75,7 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           const SizedBox(height: 12),
 
-          Text('Password baru', style: mediumTS.copyWith(color: neutral100)),
+          Text('Password baru', style: mediumTS.copyWith(color: context.neutral100)),
           const SizedBox(height: 8),
           CustomFormField(
             controller: _passwordController,

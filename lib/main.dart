@@ -4,8 +4,9 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 import 'core/bindings/app_bindings.dart';
-import 'core/common/colors.dart';
 import 'core/enums/status.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'core/utils/snackbar.dart';
 import 'features/auth/presentation/controllers/auth_controller.dart';
 import 'features/auth/presentation/pages/auth_page.dart';
@@ -32,12 +33,29 @@ class Disoriza extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Disoriza',
-      theme: ThemeData(
-        scaffoldBackgroundColor: backgroundCanvas,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       initialBinding: AppBindings(client: client),
-      home: _AuthWrapper(client: client),
+      home: _ThemeWrapper(client: client),
     );
+  }
+}
+
+/// Wrapper that listens to theme changes and rebuilds the app.
+class _ThemeWrapper extends StatelessWidget {
+  final supa.SupabaseClient client;
+  const _ThemeWrapper({required this.client});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeController = Get.find<ThemeController>();
+
+    return Obx(() {
+      // This triggers rebuild when theme changes
+      final _ = themeController.themeMode.value;
+      return _AuthWrapper(client: client);
+    });
   }
 }
 

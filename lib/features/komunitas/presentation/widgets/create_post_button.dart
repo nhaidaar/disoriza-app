@@ -18,10 +18,10 @@ class CreatePostButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: const BoxDecoration(
-        color: neutral10,
+      decoration: BoxDecoration(
+        color: context.neutral10,
         border: Border.symmetric(
-          horizontal: BorderSide(color: neutral40),
+          horizontal: BorderSide(color: context.neutral40),
         ),
       ),
       child: GestureDetector(
@@ -29,7 +29,7 @@ class CreatePostButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: backgroundCanvas,
+            color: context.backgroundCanvas,
             borderRadius: BorderRadius.circular(40),
           ),
           child: Row(
@@ -37,7 +37,7 @@ class CreatePostButton extends StatelessWidget {
             children: [
               Text(
                 'Apa yang ingin kamu tanya atau bagikan?',
-                style: mediumTS.copyWith(color: neutral70),
+                style: mediumTS.copyWith(color: context.neutral70),
               ),
 
               const Icon(IconsaxPlusLinear.edit)

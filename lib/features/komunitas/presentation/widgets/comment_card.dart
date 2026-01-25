@@ -17,11 +17,7 @@ class CommentCard extends StatefulWidget {
   final UserModel user;
   final CommentModel comment;
 
-  const CommentCard({
-    super.key,
-    required this.user,
-    required this.comment,
-  });
+  const CommentCard({super.key, required this.user, required this.comment});
 
   @override
   State<CommentCard> createState() => _CommentCardState();
@@ -45,14 +41,16 @@ class _CommentCardState extends State<CommentCard> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: defaultSmoothRadius,
-        border: Border.all(color: neutral30),
-        color: neutral10,
+        border: Border.all(color: context.neutral30),
+        color: context.neutral10,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           UserDetails(
-            name: widget.comment.idUser != null ? widget.comment.idUser!.name.toString() : 'Disoriza User',
+            name: widget.comment.idUser != null
+                ? widget.comment.idUser!.name.toString()
+                : 'Disoriza User',
             profilePicture: widget.comment.idUser?.profilePicture,
             date: widget.comment.date,
             isAdmin: widget.comment.idUser?.isAdmin ?? false,
@@ -65,14 +63,17 @@ class _CommentCardState extends State<CommentCard> {
                     onTap: () => handleLikeComment(),
                     child: Icon(
                       isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
-                      color: isLiked ? dangerMain : neutral100,
+                      color: isLiked ? dangerMain : context.neutral100,
                       size: 20,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Text(
                     (widget.comment.likes ?? []).length.toString(),
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                    style: mediumTS.copyWith(
+                      fontSize: 12,
+                      color: context.neutral80,
+                    ),
                   ),
                 ],
               ),
@@ -83,7 +84,7 @@ class _CommentCardState extends State<CommentCard> {
 
           Text(
             widget.comment.content.toString(),
-            style: mediumTS.copyWith(color: neutral90),
+            style: mediumTS.copyWith(color: context.neutral90),
           ),
 
           const SizedBox(height: 8),
@@ -95,26 +96,38 @@ class _CommentCardState extends State<CommentCard> {
                       onTap: () => handleDeleteComment(context),
                       child: Text(
                         'Hapus',
-                        style: mediumTS.copyWith(fontSize: 12, color: neutral60),
+                        style: mediumTS.copyWith(
+                          fontSize: 12,
+                          color: context.neutral60,
+                        ),
                       ),
                     ),
                     if ((widget.comment.reports ?? []).isNotEmpty) ...[
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 4),
-                        child: CircleAvatar(radius: 2, backgroundColor: Color(0xFFD9D9D9)),
+                        child: CircleAvatar(
+                          radius: 2,
+                          backgroundColor: Color(0xFFD9D9D9),
+                        ),
                       ),
                       Text(
                         'Dilaporkan oleh ${widget.comment.reports?.length} orang',
-                        style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                        style: mediumTS.copyWith(
+                          fontSize: 12,
+                          color: context.neutral80,
+                        ),
                       ),
-                    ]
+                    ],
                   ],
                 )
               : GestureDetector(
                   onTap: () => handleReportComment(context),
                   child: Text(
                     'Laporkan',
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral60),
+                    style: mediumTS.copyWith(
+                      fontSize: 12,
+                      color: context.neutral60,
+                    ),
                   ),
                 ),
         ],
@@ -136,7 +149,6 @@ class _CommentCardState extends State<CommentCard> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
                   onTap: () => komunitasController.deleteComment(
                     postId: widget.comment.idPost.toString(),
                     commentId: widget.comment.id.toString(),
@@ -147,8 +159,7 @@ class _CommentCardState extends State<CommentCard> {
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),
@@ -173,7 +184,6 @@ class _CommentCardState extends State<CommentCard> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
                   onTap: () => komunitasController.reportComment(
                     uid: widget.user.id.toString(),
                     commentId: widget.comment.id.toString(),
@@ -184,8 +194,7 @@ class _CommentCardState extends State<CommentCard> {
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),

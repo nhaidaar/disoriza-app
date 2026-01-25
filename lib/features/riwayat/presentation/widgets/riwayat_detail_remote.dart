@@ -22,12 +22,12 @@ class RiwayatDetailRemote extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: isActive ? accentOrangeMain : backgroundCanvas,
+            color: isActive ? accentOrangeMain : context.backgroundCanvas,
             borderRadius: BorderRadius.circular(100),
           ),
           child: Text(
             title,
-            style: mediumTS.copyWith(color: isActive ? neutral10 : neutral70),
+            style: mediumTS.copyWith(color: isActive ? context.neutral10 : context.neutral70),
             textAlign: TextAlign.center,
           ),
         ),

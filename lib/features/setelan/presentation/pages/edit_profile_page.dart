@@ -31,14 +31,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final setelanController = Get.find<SetelanController>();
   final authController = Get.find<AuthController>();
   Uint8List? image;
+  Worker? _profileUpdateWorker;
 
   @override
   void initState() {
     super.initState();
     _namaController.text = widget.user.name ?? '';
 
-    ever(setelanController.updatedProfile, (profile) {
-      if (profile != null) {
+    _profileUpdateWorker = ever(setelanController.updatedProfile, (profile) {
+      if (profile != null && mounted) {
         showSnackbar(context, message: 'Profil telah diperbarui');
         authController.updateUser(profile);
         setelanController.updatedProfile.value = null;
@@ -48,6 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   void dispose() {
+    _profileUpdateWorker?.dispose();
     _namaController.dispose();
     super.dispose();
   }
@@ -56,10 +58,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(
+          bottom: BorderSide(color: context.neutral30),
         ),
 
         leading: IconButton(
@@ -69,7 +71,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
         title: Text(
           'Edit Profile',
-          style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+          style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
         ),
         centerTitle: true,
       ),
@@ -78,7 +80,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Ink(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: neutral10,
+            color: context.neutral10,
             borderRadius: defaultSmoothRadius,
           ),
           child: ListView(
@@ -89,12 +91,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   alignment: Alignment.bottomRight,
                   children: [
                     Container(
-                      decoration: const ShapeDecoration(
-                        shape: CircleBorder(side: BorderSide(color: neutral50)),
+                      decoration: ShapeDecoration(
+                        shape: CircleBorder(side: BorderSide(color: context.neutral50)),
                       ),
                       child: CircleAvatar(
                         radius: 60,
-                        backgroundColor: neutral10,
+                        backgroundColor: context.neutral10,
                         backgroundImage: image != null
                             ? MemoryImage(image!)
                             : widget.user.profilePicture != null
@@ -104,7 +106,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ? null
                             : widget.user.profilePicture != null
                                 ? null
-                                : const Icon(IconsaxPlusLinear.profile, color: neutral100, size: 32),
+                                : Icon(IconsaxPlusLinear.profile, color: context.neutral100, size: 32),
                       ),
                     ),
 
@@ -120,7 +122,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: neutral10,
+                          color: context.neutral10,
                           boxShadow: const [shadowEffect1],
                         ),
                         child: const Icon(IconsaxPlusLinear.edit, size: 20),
@@ -130,11 +132,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ),
               ),
 
-              Text('Nama', style: mediumTS.copyWith(color: neutral100)),
+              Text('Nama', style: mediumTS.copyWith(color: context.neutral100)),
               const SizedBox(height: 8),
               CustomFormField(
                 controller: _namaController,
-                backgroundColor: backgroundCanvas,
+                backgroundColor: context.backgroundCanvas,
                 hint: 'Masukkan nama anda',
               ),
 

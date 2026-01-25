@@ -28,19 +28,19 @@ class RiwayatDetailCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: neutral10,
+          color: context.neutral10,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style: mediumTS.copyWith(color: neutral70),
+              style: mediumTS.copyWith(color: context.neutral70),
             ),
             const SizedBox(height: 8),
             Text(
               content,
-              style: mediumTS.copyWith(color: neutral90),
+              style: mediumTS.copyWith(color: context.neutral90),
             ),
           ],
         ),

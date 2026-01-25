@@ -39,11 +39,11 @@ class _SearchPostPageState extends State<SearchPostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
         toolbarHeight: 128,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
+        shape: Border(
+          bottom: BorderSide(color: context.neutral30),
         ),
 
         leading: IconButton(
@@ -53,7 +53,7 @@ class _SearchPostPageState extends State<SearchPostPage> {
 
         title: Text(
           'Cari diskusi',
-          style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+          style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
         ),
         centerTitle: true,
 
@@ -64,9 +64,9 @@ class _SearchPostPageState extends State<SearchPostPage> {
             child: CustomFormField(
               controller: _searchController,
               hint: 'Cari judul penyakit',
-              backgroundColor: backgroundCanvas,
+              backgroundColor: context.backgroundCanvas,
               prefixIcon: IconsaxPlusLinear.search_normal,
-              prefixIconColor: neutral60,
+              prefixIconColor: context.neutral60,
               onChanged: (value) {
                 _debounce?.cancel();
                 _debounce = Timer(const Duration(milliseconds: 500), () {

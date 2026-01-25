@@ -47,25 +47,25 @@ class _RiwayatPageState extends State<RiwayatPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 128,
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(
+          bottom: BorderSide(color: context.neutral30),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Riwayat pemindaian',
-              style: mediumTS.copyWith(color: neutral100),
+              style: mediumTS.copyWith(color: context.neutral100),
             ),
             const SizedBox(height: 16),
             CustomFormField(
               controller: _searchController,
               hint: 'Cari judul penyakit',
-              backgroundColor: backgroundCanvas,
+              backgroundColor: context.backgroundCanvas,
               prefixIcon: IconsaxPlusLinear.search_normal,
-              prefixIconColor: neutral60,
+              prefixIconColor: context.neutral60,
               onChanged: (value) {
                 Timer(Durations.extralong1, () {
                   setState(() => _searchQuery = value);

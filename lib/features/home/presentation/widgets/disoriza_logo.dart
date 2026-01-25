@@ -4,9 +4,7 @@ import '../../../../core/common/colors.dart';
 import '../../../../core/common/effects.dart';
 
 class DisorizaLogo extends StatelessWidget {
-  const DisorizaLogo({
-    super.key,
-  });
+  const DisorizaLogo({super.key});
 
   @override
   Widget build(BuildContext context) {

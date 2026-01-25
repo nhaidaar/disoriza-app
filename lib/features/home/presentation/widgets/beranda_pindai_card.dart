@@ -8,16 +8,13 @@ import 'disoriza_logo.dart';
 
 class BerandaPindaiCard extends StatelessWidget {
   final VoidCallback? onTap;
-  const BerandaPindaiCard({
-    super.key,
-    this.onTap,
-  });
+  const BerandaPindaiCard({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: Ink(
+      child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -50,6 +47,7 @@ class BerandaPindaiCard extends StatelessWidget {
             CustomButton(
               icon: IconsaxPlusBold.scan,
               text: 'Pindai',
+              textColor: neutral10,
               onTap: onTap,
             ),
           ],

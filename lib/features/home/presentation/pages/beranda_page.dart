@@ -56,8 +56,8 @@ class _BerandaPageState extends State<BerandaPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 70,
-        backgroundColor: backgroundCanvas,
-        surfaceTintColor: backgroundCanvas,
+        backgroundColor: context.backgroundCanvas,
+        surfaceTintColor: context.backgroundCanvas,
         title: Row(
           children: [
             GestureDetector(
@@ -72,12 +72,18 @@ class _BerandaPageState extends State<BerandaPage> {
               children: [
                 Text(
                   'Selamat Datang, ',
-                  style: regularTS.copyWith(fontSize: 14, color: neutral100),
+                  style: regularTS.copyWith(
+                    fontSize: 14,
+                    color: context.neutral100,
+                  ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   widget.user.name.toString(),
-                  style: mediumTS.copyWith(fontSize: 18, color: neutral100),
+                  style: mediumTS.copyWith(
+                    fontSize: 18,
+                    color: context.neutral100,
+                  ),
                 ),
               ],
             ),
@@ -112,7 +118,7 @@ class _BerandaPageState extends State<BerandaPage> {
                         'Diskusi petani',
                         style: mediumTS.copyWith(
                           fontSize: 18,
-                          color: neutral100,
+                          color: context.neutral100,
                         ),
                       ),
                       const Spacer(),
@@ -122,7 +128,7 @@ class _BerandaPageState extends State<BerandaPage> {
                           'Lihat semua',
                           style: mediumTS.copyWith(
                             fontSize: 12,
-                            color: neutral70,
+                            color: context.neutral70,
                           ),
                         ),
                       ),
@@ -139,9 +145,7 @@ class _BerandaPageState extends State<BerandaPage> {
                             children: [
                               CarouselSlider(
                                 carouselController: carouselController,
-                                items: komunitasController.posts.map((
-                                  post,
-                                ) {
+                                items: komunitasController.posts.map((post) {
                                   return PostCard(
                                     user: widget.user,
                                     post: post,
@@ -162,10 +166,10 @@ class _BerandaPageState extends State<BerandaPage> {
                               DotsIndicator(
                                 dotsCount: komunitasController.posts.length,
                                 position: carouselIndex.toDouble(),
-                                decorator: const DotsDecorator(
-                                  spacing: EdgeInsets.all(4),
-                                  color: neutral50,
-                                  activeColor: accentGreenMain,
+                                decorator: DotsDecorator(
+                                  spacing: const EdgeInsets.all(4),
+                                  color: context.neutral50,
+                                  activeColor: context.accentGreen,
                                 ),
                                 onTap: (index) {
                                   carouselController.animateToPage(index);
@@ -186,7 +190,7 @@ class _BerandaPageState extends State<BerandaPage> {
                         'Riwayat terbaru',
                         style: mediumTS.copyWith(
                           fontSize: 18,
-                          color: neutral100,
+                          color: context.neutral100,
                         ),
                       ),
                       const Spacer(),
@@ -196,7 +200,7 @@ class _BerandaPageState extends State<BerandaPage> {
                           'Lihat semua',
                           style: mediumTS.copyWith(
                             fontSize: 12,
-                            color: neutral70,
+                            color: context.neutral70,
                           ),
                         ),
                       ),
