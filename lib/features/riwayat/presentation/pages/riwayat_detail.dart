@@ -308,12 +308,17 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
         final itemOffset = position.dy - _scrollController.offset;
 
         if (itemOffset <= screenTriggerOffset) {
-          if (i == 2 ||
-              (_scrollController.tagMap[i + 1]?.context.findRenderObject()
-                          as RenderBox?)!
-                      .localToGlobal(Offset.zero)
-                      .dy >
-                  screenTriggerOffset) {
+          bool isLastOrNextBelowTrigger = i == 2;
+          if (!isLastOrNextBelowTrigger) {
+            final nextRenderObject = _scrollController.tagMap[i + 1]?.context
+                .findRenderObject();
+            if (nextRenderObject is RenderBox) {
+              isLastOrNextBelowTrigger =
+                  nextRenderObject.localToGlobal(Offset.zero).dy > screenTriggerOffset;
+            }
+          }
+
+          if (isLastOrNextBelowTrigger) {
             if (_currentIndex != i) {
               setState(() => _currentIndex = i);
             }
