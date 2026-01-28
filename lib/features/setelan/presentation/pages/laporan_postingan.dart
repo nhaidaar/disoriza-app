@@ -19,17 +19,25 @@ class LaporanPostingan extends StatefulWidget {
 class _LaporanPostinganState extends State<LaporanPostingan> {
   final komunitasController = Get.find<KomunitasController>();
 
+  Worker? _postDeletedWorker;
+
   @override
   void initState() {
     super.initState();
     fetchReportedPosts();
 
-    ever(komunitasController.postDeleted, (deleted) {
+    _postDeletedWorker = ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         fetchReportedPosts();
         komunitasController.postDeleted.value = false;
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _postDeletedWorker?.dispose();
+    super.dispose();
   }
 
   @override
