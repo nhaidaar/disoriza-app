@@ -26,11 +26,13 @@ class CommentCard extends StatefulWidget {
 class _CommentCardState extends State<CommentCard> {
   final komunitasController = Get.find<KomunitasController>();
   bool isLiked = false;
+  late List<String> localLikes;
 
   @override
   void initState() {
-    isLiked = (widget.comment.likes ?? []).contains(widget.user.id);
     super.initState();
+    localLikes = List<String>.from(widget.comment.likes ?? []);
+    isLiked = localLikes.contains(widget.user.id);
   }
 
   @override
@@ -69,7 +71,7 @@ class _CommentCardState extends State<CommentCard> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    (widget.comment.likes ?? []).length.toString(),
+                    localLikes.length.toString(),
                     style: mediumTS.copyWith(
                       fontSize: 12,
                       color: context.neutral80,
@@ -208,14 +210,16 @@ class _CommentCardState extends State<CommentCard> {
 
   void handleLikeComment() async {
     final wasLiked = isLiked;
-    final previousLikes = List<String>.from(widget.comment.likes ?? []);
+    final previousLikes = List<String>.from(localLikes);
 
     // Optimistic update
     setState(() {
       isLiked = !isLiked;
-      isLiked
-          ? (widget.comment.likes ?? []).add(widget.user.id.toString())
-          : (widget.comment.likes ?? []).remove(widget.user.id.toString());
+      if (isLiked) {
+        localLikes.add(widget.user.id.toString());
+      } else {
+        localLikes.remove(widget.user.id.toString());
+      }
     });
 
     try {
@@ -235,16 +239,18 @@ class _CommentCardState extends State<CommentCard> {
       if (komunitasController.actionStatus.value == Status.error) {
         setState(() {
           isLiked = wasLiked;
-          (widget.comment.likes ?? []).clear();
-          (widget.comment.likes ?? []).addAll(previousLikes);
+          localLikes
+            ..clear()
+            ..addAll(previousLikes);
         });
       }
     } catch (e) {
       // Rollback on exception
       setState(() {
         isLiked = wasLiked;
-        (widget.comment.likes ?? []).clear();
-        (widget.comment.likes ?? []).addAll(previousLikes);
+        localLikes
+          ..clear()
+          ..addAll(previousLikes);
       });
     }
   }
