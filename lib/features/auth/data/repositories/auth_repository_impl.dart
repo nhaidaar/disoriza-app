@@ -67,7 +67,19 @@ class AuthRepositoryImpl implements AuthRepository {
         data: {'name': name, 'profile_picture': null},
       );
 
-      return Right(UserModel(id: account.user?.id, name: name, email: email));
+      final user = account.user;
+      if (user == null || user.id.isEmpty) {
+        return Left(Exception('Registration failed: user not created'));
+      }
+
+      await client.from('users').insert({
+        'id': user.id,
+        'name': name,
+        'email': email,
+        'profile_picture': null,
+      });
+
+      return Right(UserModel(id: user.id, name: name, email: email));
     } on Exception catch (e) {
       return Left(e);
     }
