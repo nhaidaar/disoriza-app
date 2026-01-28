@@ -35,6 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final riwayatHistoryController = Get.find<RiwayatHistoryController>();
   final riwayatScanController = Get.find<RiwayatScanController>();
 
+  Worker? _riwayatDeletedWorker;
+  Worker? _historyStatusWorker;
+  Worker? _scanStatusWorker;
+
   void updateIndex(int newIndex) {
     setState(() => _selectedIndex = newIndex);
   }
@@ -49,14 +53,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    ever(riwayatHistoryController.riwayatDeleted, (deleted) {
+    _riwayatDeletedWorker = ever(riwayatHistoryController.riwayatDeleted, (deleted) {
       if (deleted) {
         handleRiwayatDeleted(context);
         riwayatHistoryController.riwayatDeleted.value = false;
       }
     });
 
-    ever(riwayatHistoryController.status, (status) {
+    _historyStatusWorker = ever(riwayatHistoryController.status, (status) {
       if (status == Status.error &&
           riwayatHistoryController.errorMessage.value.isNotEmpty) {
         showSnackbar(
@@ -68,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
 
-    ever(riwayatScanController.status, (status) {
+    _scanStatusWorker = ever(riwayatScanController.status, (status) {
       if (status == Status.loading) {
         showDiseaseLoading(context);
       } else if (status == Status.error &&
@@ -88,6 +92,14 @@ class _HomeScreenState extends State<HomeScreen> {
         handleDiseaseSuccess(context);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _riwayatDeletedWorker?.dispose();
+    _historyStatusWorker?.dispose();
+    _scanStatusWorker?.dispose();
+    super.dispose();
   }
 
   @override
