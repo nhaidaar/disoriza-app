@@ -24,13 +24,15 @@ class _UbahEmailPageState extends State<UbahEmailPage> {
   final setelanController = Get.find<SetelanController>();
   bool isEmailDifferent = false;
 
+  Worker? _emailChangedWorker;
+
   @override
   void initState() {
     super.initState();
     _emailController.text = widget.user.email.toString();
     _emailController.addListener(updateFieldState);
 
-    ever(setelanController.emailChanged, (changed) {
+    _emailChangedWorker = ever(setelanController.emailChanged, (changed) {
       if (changed) {
         handleUbahEmail(context);
         setelanController.emailChanged.value = false;
@@ -40,6 +42,7 @@ class _UbahEmailPageState extends State<UbahEmailPage> {
 
   @override
   void dispose() {
+    _emailChangedWorker?.dispose();
     _emailController.removeListener(updateFieldState);
     _emailController.dispose();
     super.dispose();
