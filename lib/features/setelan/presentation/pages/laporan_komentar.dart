@@ -19,24 +19,34 @@ class LaporanKomentar extends StatefulWidget {
 class _LaporanKomentarState extends State<LaporanKomentar> {
   final komunitasController = Get.find<KomunitasController>();
 
+  Worker? _commentDeletedWorker;
+  Worker? _postDeletedWorker;
+
   @override
   void initState() {
     super.initState();
     fetchReportedComments();
 
-    ever(komunitasController.commentDeleted, (deleted) {
+    _commentDeletedWorker = ever(komunitasController.commentDeleted, (deleted) {
       if (deleted) {
         fetchReportedComments();
         komunitasController.commentDeleted.value = false;
       }
     });
 
-    ever(komunitasController.postDeleted, (deleted) {
+    _postDeletedWorker = ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         fetchReportedComments();
         komunitasController.postDeleted.value = false;
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _commentDeletedWorker?.dispose();
+    _postDeletedWorker?.dispose();
+    super.dispose();
   }
 
   @override
