@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/enums/status.dart';
@@ -38,9 +39,10 @@ class SetelanController extends GetxController {
           status.value = Status.success;
         },
       );
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('changePassword error: $e\n$st');
+      errorMessage.value = _cleanError(e);
       status.value = Status.error;
-      rethrow;
     }
   }
 
@@ -61,9 +63,10 @@ class SetelanController extends GetxController {
           status.value = Status.success;
         },
       );
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('changeEmail error: $e\n$st');
+      errorMessage.value = _cleanError(e);
       status.value = Status.error;
-      rethrow;
     }
   }
 
@@ -91,9 +94,10 @@ class SetelanController extends GetxController {
           status.value = Status.success;
         },
       );
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('changeProfile error: $e\n$st');
+      errorMessage.value = _cleanError(e);
       status.value = Status.error;
-      rethrow;
     }
   }
 }
