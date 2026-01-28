@@ -372,24 +372,24 @@ class _DetailPostPageState extends State<DetailPostPage> {
   }
 
   void handlePostDeleted(BuildContext context) {
-    Get.back();
-    Get.back();
     showSnackbar(context, message: 'Postingan berhasil dihapus!');
+    Get.back();
+    Get.back();
   }
 
   void handleCommentDeleted(BuildContext context) {
-    Get.back();
     showSnackbar(context, message: 'Komentar berhasil dihapus!');
+    Get.back();
   }
 
   void handlePostReported(BuildContext context) {
-    Get.back();
     showSnackbar(context, message: 'Postingan berhasil dilaporkan!');
+    Get.back();
   }
 
   void handleCommentReported(BuildContext context) {
-    Get.back();
     showSnackbar(context, message: 'Komentar berhasil dilaporkan!');
+    Get.back();
   }
 
   void fetchComments() {
