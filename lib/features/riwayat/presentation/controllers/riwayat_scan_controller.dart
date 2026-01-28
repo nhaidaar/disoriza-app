@@ -37,9 +37,9 @@ class RiwayatScanController extends GetxController {
           status.value = Status.success;
         },
       );
-    } catch (_) {
+    } catch (e) {
+      errorMessage.value = _cleanError(e);
       status.value = Status.error;
-      rethrow;
     }
   }
 
