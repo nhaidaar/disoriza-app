@@ -31,6 +31,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Uint8List? image;
 
   bool areFieldsEmpty = true;
+  Worker? _postCreatedWorker;
 
   void updateFieldState() {
     setState(() {
@@ -86,17 +87,20 @@ class _CreatePostPageState extends State<CreatePostPage> {
     _titleController.addListener(updateFieldState);
     _descriptionController.addListener(updateFieldState);
 
-    ever(komunitasController.postCreated, (created) {
+    _postCreatedWorker = ever(komunitasController.postCreated, (created) {
       if (created) {
-        Get.back();
-        showSnackbar(context, message: 'Postingan berhasil terunggah');
         komunitasController.postCreated.value = false;
+        if (context.mounted) {
+          showSnackbar(context, message: 'Postingan berhasil terunggah');
+        }
+        Get.back();
       }
     });
   }
 
   @override
   void dispose() {
+    _postCreatedWorker?.dispose();
     _titleController.removeListener(updateFieldState);
     _descriptionController.removeListener(updateFieldState);
     _titleController.dispose();
