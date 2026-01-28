@@ -333,16 +333,31 @@ class _DetailPostPageState extends State<DetailPostPage> {
                     hint: 'Berikan komentar',
                   ),
                   IconButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (commentTextController.text.isNotEmpty) {
+                        final savedText = commentTextController.text;
                         final comment = CommentModel(
                           idPost: widget.post.id,
                           idUser: UserModel(id: widget.user.id),
-                          content: commentTextController.text,
+                          content: savedText,
                         );
 
-                        komunitasController.createComment(comment: comment);
-                        commentTextController.clear();
+                        await komunitasController.createComment(comment: comment);
+
+                        if (komunitasController.commentsStatus.value == Status.success) {
+                          commentTextController.clear();
+                        } else if (komunitasController.commentsStatus.value == Status.error) {
+                          commentTextController.text = savedText;
+                          if (context.mounted) {
+                            showSnackbar(
+                              context,
+                              message: komunitasController.errorMessage.value.isNotEmpty
+                                  ? komunitasController.errorMessage.value
+                                  : 'Gagal mengirim komentar',
+                              isError: true,
+                            );
+                          }
+                        }
                       }
                     },
                     icon: const Icon(IconsaxPlusLinear.send_1),
