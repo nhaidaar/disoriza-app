@@ -67,7 +67,7 @@ class _LaporanPostinganState extends State<LaporanPostingan> {
     );
   }
 
-  void fetchReportedPosts() {
-    komunitasController.fetchReportedPosts();
+  Future<void> fetchReportedPosts() {
+    return komunitasController.fetchReportedPosts();
   }
 }
