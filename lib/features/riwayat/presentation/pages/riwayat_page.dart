@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../../core/common/colors.dart';
+import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../blocs/riwayat_history/riwayat_history_bloc.dart';
+import '../controllers/riwayat_history_controller.dart';
 import '../widgets/riwayat_card.dart';
 
 class RiwayatPage extends StatefulWidget {
@@ -22,12 +23,13 @@ class RiwayatPage extends StatefulWidget {
 
 class _RiwayatPageState extends State<RiwayatPage> {
   final _searchController = TextEditingController();
+  final riwayatHistoryController = Get.find<RiwayatHistoryController>();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    fetchRiwayats(context);
+    fetchRiwayats();
   }
 
   @override
@@ -36,8 +38,8 @@ class _RiwayatPageState extends State<RiwayatPage> {
     super.dispose();
   }
 
-  void fetchRiwayats(BuildContext context) {
-    context.read<RiwayatHistoryBloc>().add(RiwayatFetchRiwayats(uid: widget.user.id.toString()));
+  void fetchRiwayats() {
+    riwayatHistoryController.fetchRiwayat(uid: widget.user.id.toString());
   }
 
   @override
@@ -45,25 +47,25 @@ class _RiwayatPageState extends State<RiwayatPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 128,
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(
+          bottom: BorderSide(color: context.neutral30),
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Riwayat pemindaian',
-              style: mediumTS.copyWith(color: neutral100),
+              style: mediumTS.copyWith(color: context.neutral100),
             ),
             const SizedBox(height: 16),
             CustomFormField(
               controller: _searchController,
               hint: 'Cari judul penyakit',
-              backgroundColor: backgroundCanvas,
+              backgroundColor: context.backgroundCanvas,
               prefixIcon: IconsaxPlusLinear.search_normal,
-              prefixIconColor: neutral60,
+              prefixIconColor: context.neutral60,
               onChanged: (value) {
                 Timer(Durations.extralong1, () {
                   setState(() => _searchQuery = value);
@@ -75,36 +77,33 @@ class _RiwayatPageState extends State<RiwayatPage> {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          fetchRiwayats(context);
+          fetchRiwayats();
         },
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            BlocBuilder<RiwayatHistoryBloc, RiwayatHistoryState>(
-              builder: (context, state) {
-                if (state is RiwayatHistoryLoading) {
-                  return const RiwayatLoadingCard();
-                } else if (state is RiwayatHistoryLoaded) {
-                  // Filter by search
-                  final filteredList = state.riwayatModel.where((riwayat) {
-                    final title = riwayat.idDisease?.name?.toLowerCase() ?? '';
-                    return title.contains(_searchQuery.toLowerCase());
-                  }).toList();
+            Obx(() {
+              if (riwayatHistoryController.status.value == Status.loading) {
+                return const RiwayatLoadingCard();
+              } else if (riwayatHistoryController.status.value == Status.success) {
+                final filteredList = riwayatHistoryController.riwayat.where((riwayat) {
+                  final title = riwayat.idDisease?.name?.toLowerCase() ?? '';
+                  return title.contains(_searchQuery.toLowerCase());
+                }).toList();
 
-                  if (filteredList.isNotEmpty) {
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: filteredList.map((riwayat) {
-                        return RiwayatCard(riwayatModel: riwayat);
-                      }).toList(),
-                    );
-                  }
-                  return const Center(child: RiwayatEmptyState());
+                if (filteredList.isNotEmpty) {
+                  return Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: filteredList.map((riwayat) {
+                      return RiwayatCard(riwayatModel: riwayat);
+                    }).toList(),
+                  );
                 }
                 return const Center(child: RiwayatEmptyState());
-              },
-            ),
+              }
+              return const Center(child: RiwayatEmptyState());
+            }),
           ],
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
@@ -9,73 +9,72 @@ import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
-import '../blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../blocs/komunitas_report/komunitas_report_bloc.dart';
+import '../controllers/komunitas_controller.dart';
 import 'components/user_details.dart';
 
 class CommentCard extends StatefulWidget {
   final UserModel user;
   final CommentModel comment;
 
-  const CommentCard({
-    super.key,
-    required this.user,
-    required this.comment,
-  });
+  const CommentCard({super.key, required this.user, required this.comment});
 
   @override
   State<CommentCard> createState() => _CommentCardState();
 }
 
 class _CommentCardState extends State<CommentCard> {
+  final komunitasController = Get.find<KomunitasController>();
   bool isLiked = false;
+  late List<String> localLikes;
 
   @override
   void initState() {
-    isLiked = (widget.comment.likes ?? []).contains(widget.user.id);
     super.initState();
+    localLikes = List<String>.from(widget.comment.likes ?? []);
+    isLiked = localLikes.contains(widget.user.id);
   }
 
   @override
   Widget build(BuildContext context) {
-    final commentBloc = context.read<KomunitasCommentBloc>();
-    final reportBloc = context.read<KomunitasReportBloc>();
-
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: defaultSmoothRadius,
-        border: Border.all(color: neutral30),
-        color: neutral10,
+        border: Border.all(color: context.neutral30),
+        color: context.neutral10,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           UserDetails(
-            name: widget.comment.idUser != null ? widget.comment.idUser!.name.toString() : 'Disoriza User',
+            name: widget.comment.idUser != null
+                ? widget.comment.idUser!.name.toString()
+                : 'Disoriza User',
             profilePicture: widget.comment.idUser?.profilePicture,
             date: widget.comment.date,
             isAdmin: widget.comment.idUser?.isAdmin ?? false,
             widget: [
               const SizedBox(width: 16),
 
-              // Delete Button
               Column(
                 children: [
                   GestureDetector(
-                    onTap: () => handleLikeComment(context),
+                    onTap: () => handleLikeComment(),
                     child: Icon(
                       isLiked ? IconsaxPlusBold.heart : IconsaxPlusLinear.heart,
-                      color: isLiked ? dangerMain : neutral100,
+                      color: isLiked ? dangerMain : context.neutral100,
                       size: 20,
                     ),
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    (widget.comment.likes ?? []).length.toString(),
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                    localLikes.length.toString(),
+                    style: mediumTS.copyWith(
+                      fontSize: 12,
+                      color: context.neutral80,
+                    ),
                   ),
                 ],
               ),
@@ -86,39 +85,50 @@ class _CommentCardState extends State<CommentCard> {
 
           Text(
             widget.comment.content.toString(),
-            style: mediumTS.copyWith(color: neutral90),
+            style: mediumTS.copyWith(color: context.neutral90),
           ),
 
           const SizedBox(height: 8),
 
-          // Delete Button
           widget.comment.idUser?.id == widget.user.id || widget.user.isAdmin
               ? Row(
                   children: [
                     GestureDetector(
-                      onTap: () => handleDeleteComment(context, commentBloc),
+                      onTap: () => handleDeleteComment(context),
                       child: Text(
                         'Hapus',
-                        style: mediumTS.copyWith(fontSize: 12, color: neutral60),
+                        style: mediumTS.copyWith(
+                          fontSize: 12,
+                          color: context.neutral60,
+                        ),
                       ),
                     ),
                     if ((widget.comment.reports ?? []).isNotEmpty) ...[
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 4),
-                        child: CircleAvatar(radius: 2, backgroundColor: Color(0xFFD9D9D9)),
+                        child: CircleAvatar(
+                          radius: 2,
+                          backgroundColor: Color(0xFFD9D9D9),
+                        ),
                       ),
                       Text(
                         'Dilaporkan oleh ${widget.comment.reports?.length} orang',
-                        style: mediumTS.copyWith(fontSize: 12, color: neutral80),
+                        style: mediumTS.copyWith(
+                          fontSize: 12,
+                          color: context.neutral80,
+                        ),
                       ),
-                    ]
+                    ],
                   ],
                 )
               : GestureDetector(
-                  onTap: () => handleReportComment(context, reportBloc),
+                  onTap: () => handleReportComment(context),
                   child: Text(
                     'Laporkan',
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral60),
+                    style: mediumTS.copyWith(
+                      fontSize: 12,
+                      color: context.neutral60,
+                    ),
                   ),
                 ),
         ],
@@ -126,7 +136,7 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  Future<void> handleDeleteComment(BuildContext context, KomunitasCommentBloc commentBloc) {
+  Future<void> handleDeleteComment(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -140,19 +150,17 @@ class _CommentCardState extends State<CommentCard> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
-                  onTap: () => commentBloc.add(KomunitasDeleteComment(
+                  onTap: () => komunitasController.deleteComment(
                     postId: widget.comment.idPost.toString(),
                     commentId: widget.comment.id.toString(),
-                  )),
+                  ),
                   text: 'Ya, hapus',
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),
@@ -164,7 +172,7 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  Future<void> handleReportComment(BuildContext context, KomunitasReportBloc reportBloc) {
+  Future<void> handleReportComment(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -177,19 +185,17 @@ class _CommentCardState extends State<CommentCard> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
-                  onTap: () => reportBloc.add(KomunitasReportComment(
+                  onTap: () => komunitasController.reportComment(
                     uid: widget.user.id.toString(),
                     commentId: widget.comment.id.toString(),
-                  )),
+                  ),
                   text: 'Ya, laporkan',
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
                   onTap: () => Navigator.of(context).pop(),
                   text: 'Batal',
                 ),
@@ -201,22 +207,41 @@ class _CommentCardState extends State<CommentCard> {
     );
   }
 
-  void handleLikeComment(BuildContext context) {
+  void handleLikeComment() async {
+    final wasLiked = isLiked;
+    final previousLikes = List<String>.from(localLikes);
+
+    // Optimistic update
     setState(() {
       isLiked = !isLiked;
-      isLiked
-          ? (widget.comment.likes ?? []).add(widget.user.id.toString())
-          : (widget.comment.likes ?? []).remove(widget.user.id.toString());
+      if (isLiked) {
+        localLikes.add(widget.user.id.toString());
+      } else {
+        localLikes.remove(widget.user.id.toString());
+      }
     });
 
-    isLiked
-        ? context.read<KomunitasCommentBloc>().add(KomunitasLikeComment(
-              uid: widget.user.id.toString(),
-              commentId: widget.comment.id.toString(),
-            ))
-        : context.read<KomunitasCommentBloc>().add(KomunitasUnlikeComment(
-              uid: widget.user.id.toString(),
-              commentId: widget.comment.id.toString(),
-            ));
+    bool success;
+    if (isLiked) {
+      success = await komunitasController.likeComment(
+        uid: widget.user.id.toString(),
+        commentId: widget.comment.id.toString(),
+      );
+    } else {
+      success = await komunitasController.unlikeComment(
+        uid: widget.user.id.toString(),
+        commentId: widget.comment.id.toString(),
+      );
+    }
+
+    // Rollback on failure
+    if (!success) {
+      setState(() {
+        isLiked = wasLiked;
+        localLikes
+          ..clear()
+          ..addAll(previousLikes);
+      });
+    }
   }
 }

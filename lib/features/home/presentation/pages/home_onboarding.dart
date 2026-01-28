@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/common/custom_button.dart';
@@ -22,27 +22,25 @@ class HomeOnboarding extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: neutral10,
+      backgroundColor: context.neutral10,
       body: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Logo
             const DisorizaLogo(),
 
             const SizedBox(height: 16),
 
-            // Greeting Message
             RichText(
               text: TextSpan(
                 text: 'Hai Naufal, Yuk mulai pemindaian pertamamu menggunakan ',
-                style: mediumTS.copyWith(fontSize: 24, color: neutral100),
+                style: mediumTS.copyWith(fontSize: 24, color: context.neutral100),
                 children: [
                   TextSpan(
                     text: 'Disoriza AI ✨',
-                    style: mediumTS.copyWith(fontSize: 24, color: accentGreenMain),
+                    style: mediumTS.copyWith(fontSize: 24, color: context.accentGreen),
                   )
                 ],
               ),
@@ -50,15 +48,13 @@ class HomeOnboarding extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Description Text
             Text(
               'Ayo coba fitur pindai yang dimiliki aplikasi ini untuk mengetahui penyakit pada padi Anda.',
-              style: mediumTS.copyWith(color: neutral70),
+              style: mediumTS.copyWith(color: context.neutral70),
             ),
 
             const SizedBox(height: 24),
 
-            // Pindai Button
             CustomButton(
               icon: IconsaxPlusLinear.scanner,
               text: 'Pindai',
@@ -67,21 +63,12 @@ class HomeOnboarding extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            // Lewati
             GestureDetector(
-              onTap: () {
-                Navigator.of(context).pushAndRemoveUntil(
-                  PageTransition(
-                    child: HomeScreen(client: client, user: user),
-                    type: PageTransitionType.fade,
-                  ),
-                  (route) => false,
-                );
-              },
+              onTap: () => Get.offAll(() => HomeScreen(client: client, user: user)),
               child: Center(
                 child: Text(
                   'Lewati',
-                  style: mediumTS.copyWith(color: neutral70),
+                  style: mediumTS.copyWith(color: context.neutral70),
                 ),
               ),
             )

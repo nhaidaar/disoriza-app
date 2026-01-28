@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
@@ -7,7 +7,8 @@ import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
-import '../blocs/auth_bloc.dart';
+import '../../../../core/enums/status.dart';
+import '../controllers/auth_controller.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -18,12 +19,22 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _emailController = TextEditingController();
+  final authController = Get.find<AuthController>();
   bool isEmailEmpty = true;
+  Worker? _passwordResetWorker;
 
   @override
   void initState() {
-    _emailController.addListener(updateFieldState);
     super.initState();
+    _emailController.addListener(updateFieldState);
+
+    // Listen for password reset success using GetX worker
+    _passwordResetWorker = ever(authController.passwordReseted, (isReseted) {
+      if (isReseted && mounted) {
+        authController.passwordReseted.value = false;
+        handlePasswordReseted(context);
+      }
+    });
   }
 
   void updateFieldState() {
@@ -32,6 +43,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   void dispose() {
+    _passwordResetWorker?.dispose();
     _emailController.removeListener(updateFieldState);
     _emailController.dispose();
     super.dispose();
@@ -39,90 +51,83 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthPasswordReseted) handlePasswordReseted(context);
-      },
-      builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: const Icon(IconsaxPlusLinear.arrow_left),
+    return Scaffold(
+      appBar: AppBar(
+        leading: GestureDetector(
+          onTap: () => Get.back(),
+          child: const Icon(IconsaxPlusLinear.arrow_left),
+        ),
+        backgroundColor: context.neutral10,
+      ),
+      body: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            color: context.neutral10,
+            child: Column(
+              children: [
+                Text(
+                  'Reset password',
+                  style: mediumTS.copyWith(fontSize: 24, color: context.neutral100),
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  'Masukkan email anda untuk mendapatkan link reset password.',
+                  style: mediumTS.copyWith(color: context.neutral100.withValues(alpha: 0.6)),
+                  textAlign: TextAlign.center,
+                )
+              ],
             ),
-            backgroundColor: neutral10,
           ),
-          body: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                color: neutral10,
-                child: Column(
-                  children: [
-                    // Title
-                    Text(
-                      'Reset password',
-                      style: mediumTS.copyWith(fontSize: 24, color: neutral100),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Subtitle
-                    Text(
-                      'Masukkan email anda untuk mendapatkan link reset password.',
-                      style: mediumTS.copyWith(color: neutral100.withOpacity(0.6)),
-                      textAlign: TextAlign.center,
-                    )
-                  ],
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              children: [
+                const Text(
+                  'Email',
+                  style: mediumTS,
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  children: [
-                    // Email Field
-                    const Text(
-                      'Email',
-                      style: mediumTS,
-                    ),
-                    const SizedBox(height: 8),
-                    CustomFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      hint: 'Masukkan email anda',
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Submit button
-                    state is AuthLoading
-                        ? const CustomLoadingButton()
-                        : CustomButton(
-                            onTap: () => context.read<AuthBloc>().add(AuthResetPassword(email: _emailController.text)),
-                            disabled: isEmailEmpty,
-                            text: 'Konfirmasi',
-                          ),
-                  ],
+                const SizedBox(height: 8),
+                CustomFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  hint: 'Masukkan email anda',
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+
+                Obx(() {
+                  if (authController.status.value == Status.loading) {
+                    return const CustomLoadingButton();
+                  }
+
+                  return CustomButton(
+                    onTap: () => authController.resetPassword(email: _emailController.text),
+                    disabled: isEmailEmpty,
+                    text: 'Konfirmasi',
+                  );
+                }),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
   Future<void> handlePasswordReseted(BuildContext context) {
     return showDialog(
       context: context,
-      builder: (context) => CustomPopup(
+      builder: (dialogContext) => CustomPopup(
         icon: IconsaxPlusBold.tick_circle,
-        iconColor: accentGreenMain,
+        iconColor: context.accentGreen,
         title: 'Email terkirim!',
         subtitle: 'Kami telah mengirimkan link reset password ke email ${_emailController.text}',
         actions: [
           CustomButton(
-            onTap: () => Navigator.of(context).pop(),
+            onTap: () => Navigator.of(dialogContext).pop(),
             text: 'Oke',
           ),
         ],

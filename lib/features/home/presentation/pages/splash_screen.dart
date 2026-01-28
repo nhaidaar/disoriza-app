@@ -14,10 +14,7 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              scale: 1.25,
-            ),
+            Image.asset('assets/images/logo.png', scale: 1.25),
             const SizedBox(height: 12),
             Text(
               'Disoriza',

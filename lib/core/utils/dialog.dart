@@ -19,14 +19,18 @@ void showDiseaseLoading(BuildContext context) async {
   );
 }
 
-void showDiseaseSehat(BuildContext context, {required VoidCallback? onScan}) async {
+void showDiseaseSehat(
+  BuildContext context, {
+  required VoidCallback? onScan,
+}) async {
   showDialog(
     context: context,
-    builder: (context) => CustomPopup(
+    builder: (dialogContext) => CustomPopup(
       icon: IconsaxPlusBold.verify,
       iconColor: successMain,
       title: 'Tanaman sehat! 👍',
-      subtitle: 'Padi yang dipindai sehat dan bebas dari infeksi. Terus jaga perawatannya untuk hasil yang maksimal!',
+      subtitle:
+          'Padi yang dipindai sehat dan bebas dari infeksi. Terus jaga perawatannya untuk hasil yang maksimal!',
       actions: [
         CustomButton(
           onTap: onScan,
@@ -35,10 +39,9 @@ void showDiseaseSehat(BuildContext context, {required VoidCallback? onScan}) asy
         ),
         const SizedBox(height: 4),
         CustomButton(
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () => Navigator.of(dialogContext).pop(),
           text: 'Batal',
-          backgroundColor: neutral10,
-          pressedColor: neutral50,
+          backgroundColor: context.neutral10,
         ),
       ],
     ),
@@ -52,7 +55,7 @@ void showDiseaseError(
 }) async {
   showDialog(
     context: context,
-    builder: (context) => CustomPopup(
+    builder: (dialogContext) => CustomPopup(
       icon: IconsaxPlusBold.close_circle,
       iconColor: dangerMain,
       title: 'Gagal memindai!',
@@ -65,10 +68,9 @@ void showDiseaseError(
         ),
         const SizedBox(height: 4),
         CustomButton(
-          onTap: () => Navigator.of(context).pop(),
+          onTap: () => Navigator.of(dialogContext).pop(),
           text: 'Batal',
-          backgroundColor: neutral10,
-          pressedColor: neutral50,
+          backgroundColor: context.neutral10,
         ),
       ],
     ),

@@ -1,17 +1,15 @@
 import 'package:disoriza/features/auth/data/models/user_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:page_transition/page_transition.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/fontstyles.dart';
-import '../../../auth/presentation/blocs/auth_bloc.dart';
-import '../../../komunitas/presentation/blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../../../komunitas/presentation/blocs/komunitas_post/komunitas_post_bloc.dart';
-import '../blocs/setelan_bloc.dart';
+import '../../../../core/theme/theme_controller.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../controllers/setelan_controller.dart';
 import '../widgets/setelan_menu.dart';
 import 'edit_profile_page.dart';
 import 'laporan_page.dart';
@@ -27,123 +25,82 @@ class SetelanPage extends StatefulWidget {
 }
 
 class _SetelanPageState extends State<SetelanPage> {
+  final authController = Get.find<AuthController>();
+  final setelanController = Get.find<SetelanController>();
+  final themeController = Get.find<ThemeController>();
+
   @override
   Widget build(BuildContext context) {
-    final authBloc = context.read<AuthBloc>();
-    final setelanBloc = context.read<SetelanBloc>();
-
-    final postBloc = context.read<KomunitasPostBloc>();
-    final commentBloc = context.read<KomunitasCommentBloc>();
-
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is Unauthenticated) Navigator.of(context).pop(); // Pop the logout popup
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: neutral10,
-          surfaceTintColor: neutral10,
-          shape: const Border(
-            bottom: BorderSide(color: neutral30),
-          ),
-          title: Text(
-            'Setelan',
-            style: mediumTS.copyWith(color: neutral100),
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
+        shape: Border(bottom: BorderSide(color: context.neutral30)),
+        title: Text(
+          'Setelan',
+          style: mediumTS.copyWith(color: context.neutral100),
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(8),
-          children: [
-            if (widget.user.isAdmin) ...[
-              // Laporan
-              SetelanMenu(
-                icon: IconsaxPlusLinear.info_circle,
-                title: 'Laporan',
-                iconColor: successMain,
-                onTap: () => Navigator.of(context).push(
-                  PageTransition(
-                    child: MultiBlocProvider(
-                      providers: [
-                        BlocProvider.value(value: postBloc),
-                        BlocProvider.value(value: commentBloc),
-                      ],
-                      child: LaporanPage(user: widget.user),
-                    ),
-                    type: PageTransitionType.rightToLeft,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-            ],
-
-            // Edit Profile
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(8),
+        children: [
+          if (widget.user.isAdmin) ...[
             SetelanMenu(
-              icon: IconsaxPlusLinear.profile,
-              title: 'Edit profile',
-              onTap: () => Navigator.of(context).push(
-                PageTransition(
-                  child: MultiBlocProvider(
-                    providers: [
-                      BlocProvider.value(
-                        value: setelanBloc,
-                      ),
-                      BlocProvider.value(
-                        value: authBloc,
-                      ),
-                    ],
-                    child: EditProfilePage(user: widget.user),
-                  ),
-                  type: PageTransitionType.rightToLeft,
-                ),
-              ),
+              icon: IconsaxPlusLinear.info_circle,
+              title: 'Laporan',
+              iconColor: successMain,
+              onTap: () => Get.to(() => LaporanPage(user: widget.user)),
             ),
 
-            // Ubah email
-            SetelanMenu(
-              icon: IconsaxPlusLinear.sms,
-              title: 'Ubah email',
-              onTap: () => Navigator.of(context).push(
-                PageTransition(
-                  child: BlocProvider.value(
-                    value: setelanBloc,
-                    child: UbahEmailPage(user: widget.user),
-                  ),
-                  type: PageTransitionType.rightToLeft,
-                ),
-              ),
-            ),
-
-            // Ubah password
-            SetelanMenu(
-              icon: IconsaxPlusLinear.key,
-              title: 'Ubah password',
-              onTap: () => Navigator.of(context).push(
-                PageTransition(
-                  child: BlocProvider.value(
-                    value: setelanBloc,
-                    child: UbahPasswordPage(user: widget.user),
-                  ),
-                  type: PageTransitionType.rightToLeft,
-                ),
-              ),
-            ),
-
-            // Logout
-            SetelanMenu(
-              icon: IconsaxPlusLinear.logout,
-              iconColor: dangerMain,
-              enableArrowRight: false,
-              title: 'Keluar',
-              onTap: () => handleLogout(context, authBloc),
-            ),
+            const SizedBox(height: 16),
           ],
-        ),
+
+          SetelanMenu(
+            icon: IconsaxPlusLinear.profile,
+            title: 'Edit profile',
+            onTap: () => Get.to(() => EditProfilePage(user: widget.user)),
+          ),
+
+          SetelanMenu(
+            icon: IconsaxPlusLinear.sms,
+            title: 'Ubah email',
+            onTap: () => Get.to(() => UbahEmailPage(user: widget.user)),
+          ),
+
+          SetelanMenu(
+            icon: IconsaxPlusLinear.key,
+            title: 'Ubah password',
+            onTap: () => Get.to(() => UbahPasswordPage(user: widget.user)),
+          ),
+
+          const SizedBox(height: 16),
+
+          Obx(
+            () => SetelanMenu(
+              icon: IconsaxPlusLinear.moon,
+              title: 'Tema',
+              subtitle: themeController.getThemeLabel(
+                themeController.themeMode.value,
+              ),
+              onTap: () => _showThemePicker(context),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          SetelanMenu(
+            icon: IconsaxPlusLinear.logout,
+            iconColor: dangerMain,
+            enableArrowRight: false,
+            title: 'Keluar',
+            onTap: () => handleLogout(context),
+          ),
+        ],
       ),
     );
   }
 
-  Future<void> handleLogout(BuildContext context, AuthBloc authBloc) {
+  Future<void> handleLogout(BuildContext context) {
     return showDialog(
       context: context,
       builder: (context) => CustomPopup(
@@ -157,24 +114,64 @@ class _SetelanPageState extends State<SetelanPage> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  pressedColor: dangerPressed,
                   text: 'Ya, keluar',
-                  onTap: () => authBloc.add(AuthLogout()),
+                  onTap: () {
+                    authController.logout();
+                    Navigator.of(context).pop();
+                  },
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: neutral10,
-                  pressedColor: neutral50,
+                  backgroundColor: context.neutral10,
+                  textColor: context.neutral100,
+                  borderColor: context.neutral30,
                   text: 'Batal',
                   onTap: () => Navigator.of(context).pop(),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
+    );
+  }
+
+  void _showThemePicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => CustomPopup(
+        icon: IconsaxPlusLinear.moon,
+        iconColor: context.accentGreen,
+        title: 'Pilih Tema',
+        actions: [
+          Column(
+            children: [
+              _buildThemeOption(dialogContext, 'Sistem', ThemeMode.system),
+              const SizedBox(height: 8),
+              _buildThemeOption(dialogContext, 'Terang', ThemeMode.light),
+              const SizedBox(height: 8),
+              _buildThemeOption(dialogContext, 'Gelap', ThemeMode.dark),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(BuildContext context, String label, ThemeMode mode) {
+    final isSelected = themeController.themeMode.value == mode;
+
+    return CustomButton(
+      onTap: () {
+        themeController.setThemeMode(mode);
+        Navigator.of(context).pop();
+      },
+      text: label,
+      textColor: isSelected ? context.neutral10 : context.neutral100,
+      borderColor: isSelected ? null : context.neutral30,
+      backgroundColor: isSelected ? context.accentGreen : context.neutral10,
     );
   }
 }

@@ -1,15 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/custom_empty_state.dart';
 import '../../../../core/common/custom_textfield.dart';
 import '../../../../core/common/fontstyles.dart';
+import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../blocs/komunitas_search/komunitas_search_bloc.dart';
+import '../controllers/komunitas_controller.dart';
 import '../widgets/post_card.dart';
 
 class SearchPostPage extends StatefulWidget {
@@ -22,10 +23,15 @@ class SearchPostPage extends StatefulWidget {
 
 class _SearchPostPageState extends State<SearchPostPage> {
   final _searchController = TextEditingController();
+  final komunitasController = Get.find<KomunitasController>();
+  Timer? _debounce;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
+    // Clear search results when leaving the page
+    komunitasController.clearSearch();
     super.dispose();
   }
 
@@ -33,22 +39,21 @@ class _SearchPostPageState extends State<SearchPostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: neutral10,
-        surfaceTintColor: neutral10,
+        backgroundColor: context.neutral10,
+        surfaceTintColor: context.neutral10,
         toolbarHeight: 128,
-        shape: const Border(
-          bottom: BorderSide(color: neutral30),
+        shape: Border(
+          bottom: BorderSide(color: context.neutral30),
         ),
 
-        // Back Button
         leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Get.back(),
           icon: const Icon(IconsaxPlusLinear.arrow_left),
         ),
 
         title: Text(
           'Cari diskusi',
-          style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+          style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
         ),
         centerTitle: true,
 
@@ -59,38 +64,37 @@ class _SearchPostPageState extends State<SearchPostPage> {
             child: CustomFormField(
               controller: _searchController,
               hint: 'Cari judul penyakit',
-              backgroundColor: backgroundCanvas,
+              backgroundColor: context.backgroundCanvas,
               prefixIcon: IconsaxPlusLinear.search_normal,
-              prefixIconColor: neutral60,
+              prefixIconColor: context.neutral60,
               onChanged: (value) {
-                Timer(const Duration(seconds: 2), () {
-                  setState(() => context.read<KomunitasSearchBloc>().add(KomunitasSearchPost(search: value)));
+                _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 500), () {
+                  komunitasController.searchPost(search: value);
                 });
               },
             ),
           ),
         ),
       ),
-      body: BlocBuilder<KomunitasSearchBloc, KomunitasSearchState>(
-        builder: (context, state) {
-          return ListView(
-            padding: const EdgeInsets.all(8),
-            children: state is KomunitasSearchLoading
-                ? [
-                    const PostLoadingCard(),
-                  ]
-                : state is KomunitasSearchLoaded
-                    ? state.postModels.isNotEmpty
-                        ? state.postModels.map((post) {
-                            return PostCard(user: widget.user, post: post);
-                          }).toList()
-                        : [
-                            const DiskusiEmptyState(),
-                          ]
-                    : [],
-          );
-        },
-      ),
+      body: Obx(() {
+        return ListView(
+          padding: const EdgeInsets.all(8),
+          children: komunitasController.searchStatus.value == Status.loading
+              ? [
+                  const PostLoadingCard(),
+                ]
+              : komunitasController.searchStatus.value == Status.success
+                  ? komunitasController.searchResults.isNotEmpty
+                      ? komunitasController.searchResults.map((post) {
+                          return PostCard(user: widget.user, post: post);
+                        }).toList()
+                      : [
+                          const DiskusiEmptyState(),
+                        ]
+                  : [],
+        );
+      }),
     );
   }
 }

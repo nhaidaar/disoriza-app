@@ -35,11 +35,11 @@ class _CustomDropdownState<K, V> extends State<CustomDropdown<K, V>> {
       initialValue: selectedValue,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: neutral30),
+        side: BorderSide(color: context.neutral30),
       ),
       elevation: 0,
       position: PopupMenuPosition.under,
-      color: backgroundComponent,
+      color: context.backgroundComponent,
 
       // Handle selection change
       onSelected: (value) {
@@ -57,7 +57,7 @@ class _CustomDropdownState<K, V> extends State<CustomDropdown<K, V>> {
               children: [
                 Text(
                   item.key.toString(),
-                  style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+                  style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
                 ),
                 if (selectedValue == item) const Icon(Icons.check, size: 20),
               ],
@@ -71,7 +71,7 @@ class _CustomDropdownState<K, V> extends State<CustomDropdown<K, V>> {
           children: [
             Text(
               selectedValue.key.toString(),
-              style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+              style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
             ),
             const SizedBox(width: 4),
             const Icon(IconsaxPlusLinear.arrow_down, size: 20),

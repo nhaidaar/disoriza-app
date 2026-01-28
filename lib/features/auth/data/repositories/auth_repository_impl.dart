@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:disoriza/features/auth/domain/repositories/auth_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,14 +15,16 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Exception, UserModel>> checkSession() async {
     try {
       final user = client.auth.currentSession;
-      if (user == null) return Left(Exception());
+      if (user == null) return Left(Exception('No active session'));
 
       final uid = user.user.id;
       final userModel = await fetchUserModel(uid: uid);
       if (userModel != null) {
-        if (user.user.email != userModel.email) {
-          await client.from('users').update({'email': user.user.email}).eq('id', uid);
-        }
+        await _syncEmailIfNeeded(
+          uid: uid,
+          authEmail: user.user.email,
+          dbEmail: userModel.email,
+        );
         return Right(userModel);
       }
 
@@ -41,6 +44,21 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  /// Syncs email from auth to users table if they differ.
+  Future<void> _syncEmailIfNeeded({
+    required String uid,
+    required String? authEmail,
+    required String? dbEmail,
+  }) async {
+    if (authEmail != null && authEmail != dbEmail) {
+      try {
+        await client.from('users').update({'email': authEmail}).eq('id', uid);
+      } catch (e, st) {
+        debugPrint('_syncEmailIfNeeded error: $e\n$st');
+      }
+    }
+  }
+
   @override
   Future<Either<Exception, UserModel>> register({
     required String name,
@@ -51,18 +69,22 @@ class AuthRepositoryImpl implements AuthRepository {
       final account = await client.auth.signUp(
         email: email,
         password: password,
+        data: {'name': name, 'profile_picture': null},
       );
+
+      final user = account.user;
+      if (user == null || user.id.isEmpty) {
+        return Left(Exception('Registration failed: user not created'));
+      }
+
       await client.from('users').insert({
-        'id': account.user?.id,
+        'id': user.id,
         'name': name,
         'email': email,
+        'profile_picture': null,
       });
 
-      return Right(UserModel(
-        id: account.user?.id,
-        name: name,
-        email: email,
-      ));
+      return Right(UserModel(id: user.id, name: name, email: email));
     } on Exception catch (e) {
       return Left(e);
     }
@@ -83,9 +105,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final uid = session.user!.id;
       final userModel = await fetchUserModel(uid: uid);
       if (userModel != null) {
-        if (session.user?.email != userModel.email) {
-          await client.from('users').update({'email': session.user?.email}).eq('id', uid);
-        }
+        await _syncEmailIfNeeded(
+          uid: uid,
+          authEmail: session.user?.email,
+          dbEmail: userModel.email,
+        );
         return Right(userModel);
       }
 
@@ -138,12 +162,15 @@ class AuthRepositoryImpl implements AuthRepository {
         updates['profile_picture'] = url;
       }
 
-      final response = await client.from('users').update(updates).eq('id', uid).select().single();
+      final response = await client
+          .from('users')
+          .update(updates)
+          .eq('id', uid)
+          .select()
+          .single();
 
       final updatedUser = UserModel.fromMap(response);
       return Right(updatedUser);
-      // } on PostgrestException catch (e) {
-      //   return Left(Exception(e.message));
     } on Exception catch (e) {
       return Left(e);
     }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/common/custom_empty_state.dart';
+import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
-import '../../../komunitas/presentation/blocs/komunitas_comment/komunitas_comment_bloc.dart';
-import '../../../komunitas/presentation/blocs/komunitas_post/komunitas_post_bloc.dart';
+import '../../../komunitas/presentation/controllers/komunitas_controller.dart';
 import '../../../komunitas/presentation/widgets/post_card.dart';
 import '../../../komunitas/presentation/widgets/reported_comment_card.dart';
 
@@ -17,60 +17,70 @@ class LaporanKomentar extends StatefulWidget {
 }
 
 class _LaporanKomentarState extends State<LaporanKomentar> {
+  final komunitasController = Get.find<KomunitasController>();
+
+  Worker? _commentDeletedWorker;
+  Worker? _postDeletedWorker;
+
   @override
   void initState() {
     super.initState();
-    fetchReportedComments(context);
+    fetchReportedComments();
+
+    _commentDeletedWorker = ever(komunitasController.commentDeleted, (deleted) {
+      if (deleted) {
+        fetchReportedComments();
+        komunitasController.commentDeleted.value = false;
+      }
+    });
+
+    _postDeletedWorker = ever(komunitasController.postDeleted, (deleted) {
+      if (deleted) {
+        fetchReportedComments();
+        komunitasController.postDeleted.value = false;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _commentDeletedWorker?.dispose();
+    _postDeletedWorker?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<KomunitasCommentBloc, KomunitasCommentState>(
-          listener: (context, state) {
-            if (state is KomunitasCommentDeleted) fetchReportedComments(context);
-          },
-        ),
-        BlocListener<KomunitasPostBloc, KomunitasPostState>(
-          listener: (context, state) {
-            if (state is KomunitasPostDeleted) fetchReportedComments(context);
-          },
-        ),
-      ],
-      child: RefreshIndicator(
-        onRefresh: () async => fetchReportedComments(context),
-        child: BlocBuilder<KomunitasPostBloc, KomunitasPostState>(
-          builder: (context, state) {
-            return ListView(
-              padding: const EdgeInsets.all(8),
-              children: state is KomunitasPostLoading
-                  ? [
-                      const PostLoadingCard(),
-                    ]
-                  : state is KomunitasPostWithCommentLoaded
-                      ? state.commentWithPost.isNotEmpty
-                          ? state.commentWithPost.map((model) {
-                              return ReportedCommentCard(
-                                user: widget.user,
-                                comment: model.commentModel,
-                                post: model.postModel,
-                              );
-                            }).toList()
-                          : [
-                              const KomentarEmptyState(),
-                            ]
+    return RefreshIndicator(
+      onRefresh: () async => fetchReportedComments(),
+      child: Obx(() {
+        return ListView(
+          padding: const EdgeInsets.all(8),
+          children: komunitasController.commentsStatus.value == Status.loading
+              ? [
+                  const PostLoadingCard(),
+                ]
+              : komunitasController.commentsStatus.value == Status.success
+                  ? komunitasController.reportedComments.isNotEmpty
+                      ? komunitasController.reportedComments.map((model) {
+                          return ReportedCommentCard(
+                            user: widget.user,
+                            comment: model.commentModel,
+                            post: model.postModel,
+                          );
+                        }).toList()
                       : [
                           const KomentarEmptyState(),
-                        ],
-            );
-          },
-        ),
-      ),
+                        ]
+                  : [
+                      const KomentarEmptyState(),
+                    ],
+        );
+      }),
     );
   }
 
-  void fetchReportedComments(BuildContext context) {
-    context.read<KomunitasPostBloc>().add(KomunitasFetchReportedComments());
+  Future<void> fetchReportedComments() {
+    return komunitasController.fetchReportedComments();
   }
 }

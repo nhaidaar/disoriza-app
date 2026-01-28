@@ -5,7 +5,8 @@ import 'fontstyles.dart';
 
 class CustomButton extends StatelessWidget {
   final Color? backgroundColor;
-  final Color? pressedColor;
+  final Color? borderColor;
+  final Color? textColor;
   final IconData? icon;
   final String text;
   final bool disabled;
@@ -13,8 +14,9 @@ class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
     this.icon,
+    this.textColor,
     this.backgroundColor = accentOrangeMain,
-    this.pressedColor = accentOrangePressed,
+    this.borderColor,
     required this.text,
     this.disabled = false,
     this.onTap,
@@ -22,29 +24,41 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNeutralBg =
+        backgroundColor == neutral10 || backgroundColor == neutral10Light;
     return InkWell(
       onTap: !disabled ? onTap : null,
-      splashColor: !disabled ? pressedColor : null,
-      highlightColor: !disabled ? pressedColor : null,
       borderRadius: BorderRadius.circular(100),
-      child: Ink(
+      child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: !disabled ? backgroundColor : neutral30,
+          color: !disabled ? backgroundColor : context.neutral30,
           borderRadius: BorderRadius.circular(40),
-          border: backgroundColor == neutral10 ? Border.all(color: neutral30) : null,
+          border: borderColor != null
+              ? Border.all(color: borderColor!)
+              : (isNeutralBg ? Border.all(color: context.neutral30) : null),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) Icon(icon, color: neutral10, size: 20),
-            if (icon != null) const SizedBox(width: 8),
+            if (icon != null) ...[
+              Icon(
+                icon,
+                color:
+                    textColor ??
+                    (isNeutralBg ? context.neutral100 : context.neutral10),
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+            ],
             Text(
               text,
               style: mediumTS.copyWith(
                 fontSize: 16,
-                color: backgroundColor == neutral10 ? neutral100 : neutral10,
+                color:
+                    textColor ??
+                    (isNeutralBg ? context.neutral100 : context.neutral10),
               ),
               textAlign: TextAlign.center,
             ),
@@ -64,13 +78,15 @@ class CustomLoadingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNeutralBg =
+        backgroundColor == neutral10 || backgroundColor == neutral10Light;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(40),
-        border: backgroundColor == neutral10 ? Border.all(color: neutral30) : null,
+        border: isNeutralBg ? Border.all(color: context.neutral30) : null,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -79,7 +95,7 @@ class CustomLoadingButton extends StatelessWidget {
             height: 23,
             width: 23,
             child: CircularProgressIndicator(
-              color: backgroundColor == neutral10 ? neutral30 : neutral10,
+              color: isNeutralBg ? context.neutral30 : context.neutral10,
             ),
           ),
         ],

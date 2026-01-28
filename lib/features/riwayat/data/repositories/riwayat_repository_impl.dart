@@ -19,7 +19,9 @@ class RiwayatRepositoryImpl implements RiwayatRepository {
     int? max,
   }) async {
     try {
-      final response = await client.from('histories').select('''
+      final response = await client
+          .from('histories')
+          .select('''
             *,
             diseases (
               id,
@@ -28,7 +30,9 @@ class RiwayatRepositoryImpl implements RiwayatRepository {
               solution,
               symtomp
             )
-          ''').eq('id_user', uid).order('created_at', ascending: false);
+          ''')
+          .eq('id_user', uid)
+          .order('created_at', ascending: false);
 
       List<RiwayatModel> riwayat = List<RiwayatModel>.from(
         response.map((doc) => RiwayatModel.fromMap(doc)),
@@ -57,29 +61,40 @@ class RiwayatRepositoryImpl implements RiwayatRepository {
       // Add image file to the request
       request.files.add(
         http.MultipartFile.fromBytes(
-          'image', imageBytes,
+          'image',
+          imageBytes,
           filename: image.path.split('/').last,
           // contentType: MediaType('image', 'jpeg'),
         ),
       );
 
       // Sending image to model
-      final response = await request.send().then((res) async => await http.Response.fromStream(res));
-      if (response.statusCode == 413) return Left(Exception('Ukuran gambar terlalu besar!')); // If image size to high
+      final response = await request.send().then(
+        (res) async => await http.Response.fromStream(res),
+      );
+      if (response.statusCode == 413)
+        return Left(
+          Exception('Ukuran gambar terlalu besar!'),
+        ); // If image size to high
 
       // Decode the response body
       final responseBody = jsonDecode(response.body);
 
       // If detection is error
-      if (response.statusCode == 400 || response.statusCode == 202) return Left(Exception(responseBody['message']));
+      if (response.statusCode == 400 || response.statusCode == 202) {
+        return Left(Exception(responseBody['message']));
+      }
 
       // If no disease detected
       if (response.statusCode == 201) return const Right(null);
 
       // If any disease detected
       final time = DateTime.now().millisecondsSinceEpoch;
-      final path = '/$uid/${time}_${image.path.split('/').last}'; // Set for file path (name)
-      await client.storage.from('user_histories').uploadBinary(path, imageBytes); // Upload image to supabase
+      final path =
+          '/$uid/${time}_${image.path.split('/').last}'; // Set for file path (name)
+      await client.storage
+          .from('user_histories')
+          .uploadBinary(path, imageBytes); // Upload image to supabase
       final url = client.storage.from('user_histories').getPublicUrl(path);
       final disease = await client
           .from('diseases')
@@ -97,7 +112,11 @@ class RiwayatRepositoryImpl implements RiwayatRepository {
       );
 
       // Return the model
-      final supaResponse = await client.from('histories').insert(riwayat.toMap()).select().single();
+      final supaResponse = await client
+          .from('histories')
+          .insert(riwayat.toMap())
+          .select()
+          .single();
       return Right(riwayat.copyWith(id: supaResponse['id']));
     } on Exception catch (e) {
       return Left(e);
@@ -105,7 +124,9 @@ class RiwayatRepositoryImpl implements RiwayatRepository {
   }
 
   @override
-  Future<Either<Exception, void>> deleteRiwayat({required String riwayatId}) async {
+  Future<Either<Exception, void>> deleteRiwayat({
+    required String riwayatId,
+  }) async {
     try {
       await client.from('histories').delete().eq('id', riwayatId);
       return const Right(null);

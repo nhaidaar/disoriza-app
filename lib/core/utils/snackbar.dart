@@ -15,14 +15,14 @@ void showSnackbar(
     duration: const Duration(seconds: 3),
     mobileSnackBarPosition: MobileSnackBarPosition.bottom,
     desktopSnackBarPosition: DesktopSnackBarPosition.topCenter,
-    builder: (context) {
+    builder: (snackBarContext) {
       return Container(
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: defaultSmoothRadius,
-          border: Border.all(color: neutral30),
-          color: neutral10,
+          border: Border.all(color: context.neutral30),
+          color: context.neutral10,
           boxShadow: const [shadowEffect1],
         ),
         child: Row(
@@ -39,7 +39,7 @@ void showSnackbar(
                 message,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: mediumTS.copyWith(fontSize: 14, color: neutral100),
+                style: mediumTS.copyWith(fontSize: 14, color: context.neutral100),
               ),
             ),
           ],

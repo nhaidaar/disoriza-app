@@ -25,15 +25,15 @@ Future<bool> getPermission(ImageSource source) async {
   final permission = source == ImageSource.camera
       ? await Permission.camera.status
       : olderAndroid
-          ? await Permission.storage.status
-          : await Permission.photos.status;
+      ? await Permission.storage.status
+      : await Permission.photos.status;
 
   if (permission != PermissionStatus.granted) {
     return source == ImageSource.camera
         ? await Permission.camera.request().isGranted
         : olderAndroid
-            ? await Permission.storage.request().isGranted
-            : await Permission.photos.request().isGranted;
+        ? await Permission.storage.request().isGranted
+        : await Permission.photos.request().isGranted;
   }
   return true;
 }
@@ -43,12 +43,10 @@ Future<XFile?> pickImage(BuildContext context) async {
 
   await showDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: defaultSmoothRadius,
-      ),
-      backgroundColor: neutral10,
-      surfaceTintColor: neutral10,
+    builder: (dialogContext) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: defaultSmoothRadius),
+      backgroundColor: context.neutral10,
+      surfaceTintColor: context.neutral10,
       titlePadding: const EdgeInsets.all(12),
       title: Padding(
         padding: const EdgeInsets.all(8),
@@ -56,7 +54,7 @@ Future<XFile?> pickImage(BuildContext context) async {
           children: [
             Text(
               'Ingin mengupload gambar darimana?',
-              style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+              style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
             ),
 
             const SizedBox(height: 8),
@@ -67,7 +65,7 @@ Future<XFile?> pickImage(BuildContext context) async {
               title: 'Ambil Foto',
               onTap: () {
                 source = ImageSource.camera;
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
 
@@ -79,17 +77,18 @@ Future<XFile?> pickImage(BuildContext context) async {
               title: 'Pilih dari Galeri',
               onTap: () {
                 source = ImageSource.gallery;
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
 
             const SizedBox(height: 8),
 
             CustomButton(
-              onTap: () => Navigator.of(context).pop(),
+              onTap: () => Navigator.of(dialogContext).pop(),
               text: 'Batal',
-              backgroundColor: neutral10,
-              pressedColor: neutral50,
+              textColor: context.neutral100,
+              backgroundColor: context.neutral10,
+              borderColor: context.neutral30,
             ),
           ],
         ),
@@ -100,7 +99,8 @@ Future<XFile?> pickImage(BuildContext context) async {
   if (source == null) return null;
 
   final permissionGranted = await getPermission(source!);
-  if (permissionGranted) return await ImagePicker().pickImage(source: source!, imageQuality: 80);
+  if (permissionGranted)
+    return await ImagePicker().pickImage(source: source!, imageQuality: 80);
   return null;
 }
 
@@ -108,36 +108,41 @@ class PickImageButton extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback? onTap;
-  const PickImageButton({super.key, required this.icon, required this.title, this.onTap});
+  const PickImageButton({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      splashColor: neutral50,
-      highlightColor: neutral50,
+      splashColor: context.neutral50,
+      highlightColor: context.neutral50,
       borderRadius: BorderRadius.circular(8),
       child: Ink(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: neutral20,
+          color: context.neutral20,
           borderRadius: halfSmoothRadius,
-          border: Border.all(color: neutral30),
+          border: Border.all(color: context.neutral30),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: neutral10,
+                color: context.neutral10,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: Icon(icon, color: neutral100),
+              child: Icon(icon, color: context.neutral100),
             ),
             const SizedBox(width: 8),
             Text(
               title,
-              style: mediumTS.copyWith(fontSize: 16, color: neutral100),
+              style: mediumTS.copyWith(fontSize: 16, color: context.neutral100),
             ),
           ],
         ),

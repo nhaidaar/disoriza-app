@@ -1,16 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_loading/card_loading.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:page_transition/page_transition.dart';
+import 'package:get/get.dart';
 
 import '../../../../core/common/colors.dart';
 import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../../core/utils/format.dart';
 import '../../data/models/riwayat_model.dart';
-import '../blocs/riwayat_history/riwayat_history_bloc.dart';
-import '../blocs/riwayat_scan/riwayat_scan_bloc.dart';
 import '../pages/riwayat_detail.dart';
 
 class RiwayatCard extends StatelessWidget {
@@ -21,28 +18,11 @@ class RiwayatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          PageTransition(
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider.value(
-                  value: context.read<RiwayatHistoryBloc>(),
-                ),
-                BlocProvider.value(
-                  value: context.read<RiwayatScanBloc>(),
-                ),
-              ],
-              child: RiwayatDetail(riwayat: riwayatModel),
-            ),
-            type: PageTransitionType.rightToLeft,
-          ),
-        );
-      },
+      onTap: () => Get.to(() => RiwayatDetail(riwayat: riwayatModel)),
       child: Container(
         width: MediaQuery.of(context).size.width / 2 - 24,
         decoration: BoxDecoration(
-          color: neutral10,
+          color: context.neutral10,
           borderRadius: defaultSmoothRadius,
           boxShadow: const [shadowEffect1],
         ),
@@ -71,16 +51,19 @@ class RiwayatCard extends StatelessWidget {
                 children: [
                   Text(
                     riwayatModel.idDisease!.name.toString(),
-                    style: mediumTS.copyWith(color: neutral100),
+                    style: mediumTS.copyWith(color: context.neutral100),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     formatTimeAgo(riwayatModel.date),
-                    style: mediumTS.copyWith(fontSize: 12, color: neutral70),
+                    style: mediumTS.copyWith(
+                      fontSize: 12,
+                      color: context.neutral70,
+                    ),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -101,6 +84,10 @@ class RiwayatLoadingCard extends StatelessWidget {
           height: 160,
           width: MediaQuery.of(context).size.width / 2 - 24,
           borderRadius: BorderRadius.circular(16),
+          cardLoadingTheme: CardLoadingTheme(
+            colorOne: context.neutral30,
+            colorTwo: context.neutral40,
+          ),
         );
       }),
     );

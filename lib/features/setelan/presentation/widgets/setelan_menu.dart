@@ -9,13 +9,15 @@ class SetelanMenu extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;
   final String title;
+  final String? subtitle;
   final VoidCallback? onTap;
   final bool enableArrowRight;
   const SetelanMenu({
     super.key,
     required this.icon,
-    this.iconColor = neutral100,
+    this.iconColor,
     required this.title,
+    this.subtitle,
     this.onTap,
     this.enableArrowRight = true,
   });
@@ -24,37 +26,57 @@ class SetelanMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: InkWell(
+      child: GestureDetector(
         onTap: onTap,
-        splashColor: neutral50,
-        highlightColor: neutral50,
-        customBorder: RoundedRectangleBorder(
-          borderRadius: defaultSmoothRadius,
-        ),
-        child: Ink(
+        // splashColor: context.neutral50,
+        // highlightColor: context.neutral50,
+        // customBorder: RoundedRectangleBorder(
+        //   borderRadius: defaultSmoothRadius,
+        // ),
+        child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: defaultSmoothRadius,
-            color: neutral10,
+            color: context.neutral10,
           ),
           child: Row(
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: backgroundCanvas,
+                backgroundColor: context.backgroundCanvas,
                 child: Icon(
                   icon,
                   size: 20,
-                  color: iconColor,
+                  color: iconColor ?? context.neutral100,
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: mediumTS.copyWith(color: iconColor),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: mediumTS.copyWith(
+                        color: iconColor ?? context.neutral100,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        style: mediumTS.copyWith(
+                          fontSize: 12,
+                          color: context.neutral60,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-              const Spacer(),
-              if (enableArrowRight) Icon(IconsaxPlusLinear.arrow_right_3, color: iconColor),
+              if (enableArrowRight)
+                Icon(
+                  IconsaxPlusLinear.arrow_right_3,
+                  color: iconColor ?? context.neutral100,
+                ),
             ],
           ),
         ),

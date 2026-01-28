@@ -18,7 +18,7 @@ class AuthPage extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
-              color: neutral10,
+              color: context.neutral10,
               child: Column(
                 children: [
                   const DisorizaLogo(),
@@ -28,12 +28,15 @@ class AuthPage extends StatelessWidget {
                   // Greeting messages
                   Text(
                     'Selamat Datang di Disoriza!',
-                    style: mediumTS.copyWith(fontSize: 24, color: neutral100),
+                    style: mediumTS.copyWith(
+                      fontSize: 24,
+                      color: context.neutral100,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Jelajahi fitur pemindai untuk mengetahui penyakit pada padi.',
-                    style: mediumTS.copyWith(color: neutral70),
+                    style: mediumTS.copyWith(color: context.neutral70),
                     textAlign: TextAlign.center,
                   ),
 
@@ -44,13 +47,19 @@ class AuthPage extends StatelessWidget {
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
-                      color: backgroundCanvas,
+                      color: context.backgroundCanvas,
                     ),
                     child: TabBar(
-                      labelStyle: mediumTS.copyWith(fontSize: 16, color: accentGreenMain),
-                      unselectedLabelStyle: mediumTS.copyWith(fontSize: 16, color: neutral60),
+                      labelStyle: mediumTS.copyWith(
+                        fontSize: 16,
+                        color: context.accentGreen,
+                      ),
+                      unselectedLabelStyle: mediumTS.copyWith(
+                        fontSize: 16,
+                        color: context.neutral60,
+                      ),
                       indicator: BoxDecoration(
-                        color: neutral10,
+                        color: context.neutral10,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
@@ -70,10 +79,7 @@ class AuthPage extends StatelessWidget {
             const Expanded(
               child: TabBarView(
                 physics: NeverScrollableScrollPhysics(),
-                children: [
-                  RegisterPage(),
-                  LoginPage(),
-                ],
+                children: [RegisterPage(), LoginPage()],
               ),
             ),
           ],
