@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:disoriza/features/auth/domain/repositories/auth_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -50,7 +51,11 @@ class AuthRepositoryImpl implements AuthRepository {
     required String? dbEmail,
   }) async {
     if (authEmail != null && authEmail != dbEmail) {
-      await client.from('users').update({'email': authEmail}).eq('id', uid);
+      try {
+        await client.from('users').update({'email': authEmail}).eq('id', uid);
+      } catch (e, st) {
+        debugPrint('_syncEmailIfNeeded error: $e\n$st');
+      }
     }
   }
 
