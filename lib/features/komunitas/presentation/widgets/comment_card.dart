@@ -7,7 +7,6 @@ import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
-import '../../../../core/enums/status.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../data/models/comment_model.dart';
 import '../controllers/komunitas_controller.dart';
@@ -222,30 +221,21 @@ class _CommentCardState extends State<CommentCard> {
       }
     });
 
-    try {
-      if (isLiked) {
-        await komunitasController.likeComment(
-          uid: widget.user.id.toString(),
-          commentId: widget.comment.id.toString(),
-        );
-      } else {
-        await komunitasController.unlikeComment(
-          uid: widget.user.id.toString(),
-          commentId: widget.comment.id.toString(),
-        );
-      }
+    bool success;
+    if (isLiked) {
+      success = await komunitasController.likeComment(
+        uid: widget.user.id.toString(),
+        commentId: widget.comment.id.toString(),
+      );
+    } else {
+      success = await komunitasController.unlikeComment(
+        uid: widget.user.id.toString(),
+        commentId: widget.comment.id.toString(),
+      );
+    }
 
-      // Rollback on error
-      if (komunitasController.actionStatus.value == Status.error) {
-        setState(() {
-          isLiked = wasLiked;
-          localLikes
-            ..clear()
-            ..addAll(previousLikes);
-        });
-      }
-    } catch (e) {
-      // Rollback on exception
+    // Rollback on failure
+    if (!success) {
       setState(() {
         isLiked = wasLiked;
         localLikes

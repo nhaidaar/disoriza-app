@@ -519,25 +519,28 @@ class KomunitasController extends GetxController {
   ///
   /// [uid] - User ID who is liking.
   /// [commentId] - ID of the comment to like.
-  Future<void> likeComment({required String uid, required String commentId}) async {
+  /// Returns true on success, false on failure.
+  Future<bool> likeComment({required String uid, required String commentId}) async {
     try {
       actionStatus.value = Status.loading;
       errorMessage.value = '';
 
       final result = await _usecase.likeComment(uid: uid, commentId: commentId);
-      result.fold(
+      return result.fold(
         (error) {
           errorMessage.value = _cleanError(error);
           actionStatus.value = Status.error;
+          return false;
         },
         (success) {
           lastOperation.value = KomunitasOperation.commentLiked;
           actionStatus.value = Status.success;
+          return true;
         },
       );
     } catch (_) {
       actionStatus.value = Status.error;
-      rethrow;
+      return false;
     }
   }
 
@@ -545,25 +548,28 @@ class KomunitasController extends GetxController {
   ///
   /// [uid] - User ID who is unliking.
   /// [commentId] - ID of the comment to unlike.
-  Future<void> unlikeComment({required String uid, required String commentId}) async {
+  /// Returns true on success, false on failure.
+  Future<bool> unlikeComment({required String uid, required String commentId}) async {
     try {
       actionStatus.value = Status.loading;
       errorMessage.value = '';
 
       final result = await _usecase.unlikeComment(uid: uid, commentId: commentId);
-      result.fold(
+      return result.fold(
         (error) {
           errorMessage.value = _cleanError(error);
           actionStatus.value = Status.error;
+          return false;
         },
         (success) {
           lastOperation.value = KomunitasOperation.commentUnliked;
           actionStatus.value = Status.success;
+          return true;
         },
       );
     } catch (_) {
       actionStatus.value = Status.error;
-      rethrow;
+      return false;
     }
   }
 
