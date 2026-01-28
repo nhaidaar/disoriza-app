@@ -22,12 +22,15 @@ class LaporanPage extends StatefulWidget {
 class _LaporanPageState extends State<LaporanPage> {
   final komunitasController = Get.find<KomunitasController>();
 
+  Worker? _postsWorker;
+  Worker? _commentsWorker;
+
   @override
   void initState() {
     super.initState();
 
     // Listen for posts errors
-    ever(komunitasController.postsStatus, (status) {
+    _postsWorker = ever(komunitasController.postsStatus, (status) {
       if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
         showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
         komunitasController.errorMessage.value = '';
@@ -35,12 +38,19 @@ class _LaporanPageState extends State<LaporanPage> {
     });
 
     // Listen for comments errors
-    ever(komunitasController.commentsStatus, (status) {
+    _commentsWorker = ever(komunitasController.commentsStatus, (status) {
       if (status == Status.error && komunitasController.errorMessage.value.isNotEmpty) {
         showSnackbar(context, message: komunitasController.errorMessage.value, isError: true);
         komunitasController.errorMessage.value = '';
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _postsWorker?.dispose();
+    _commentsWorker?.dispose();
+    super.dispose();
   }
 
   @override
