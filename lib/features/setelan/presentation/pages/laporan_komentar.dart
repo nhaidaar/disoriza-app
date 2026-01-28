@@ -80,7 +80,7 @@ class _LaporanKomentarState extends State<LaporanKomentar> {
     );
   }
 
-  void fetchReportedComments() {
-    komunitasController.fetchReportedComments();
+  Future<void> fetchReportedComments() {
+    return komunitasController.fetchReportedComments();
   }
 }
