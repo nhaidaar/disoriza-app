@@ -10,9 +10,11 @@ import '../../../../core/common/custom_popup.dart';
 import '../../../../core/common/effects.dart';
 import '../../../../core/common/fontstyles.dart';
 import '../../../../core/common/colors.dart';
+import '../../../../core/enums/status.dart';
 import '../../../../core/utils/camera.dart';
 import '../../../../core/utils/format.dart';
 import '../../../../core/utils/network_image.dart';
+import '../../../../core/utils/snackbar.dart';
 import '../../../home/presentation/widgets/disoriza_logo.dart';
 import '../../data/models/riwayat_model.dart';
 import '../controllers/riwayat_history_controller.dart';
@@ -241,7 +243,7 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
   Future<void> handleDeleteRiwayat(BuildContext context) {
     return showDialog(
       context: context,
-      builder: (context) => CustomPopup(
+      builder: (dialogContext) => CustomPopup(
         icon: IconsaxPlusLinear.trash,
         iconColor: dangerMain,
         title: 'Ingin menghapus riwayat ini?',
@@ -252,17 +254,37 @@ class _RiwayatDetailState extends State<RiwayatDetail> {
               Expanded(
                 child: CustomButton(
                   backgroundColor: dangerMain,
-                  onTap: () => riwayatHistoryController.deleteRiwayat(
-                    riwayatId: widget.riwayat.id.toString(),
-                  ),
+                  onTap: () async {
+                    await riwayatHistoryController.deleteRiwayat(
+                      riwayatId: widget.riwayat.id.toString(),
+                    );
+
+                    if (riwayatHistoryController.status.value == Status.success) {
+                      if (dialogContext.mounted) {
+                        Navigator.of(dialogContext).pop();
+                      }
+                      Get.back();
+                    } else if (riwayatHistoryController.status.value == Status.error) {
+                      if (dialogContext.mounted) {
+                        Navigator.of(dialogContext).pop();
+                      }
+                      if (context.mounted) {
+                        showSnackbar(
+                          context,
+                          message: riwayatHistoryController.errorMessage.value,
+                          isError: true,
+                        );
+                      }
+                    }
+                  },
                   text: 'Ya, hapus',
                 ),
               ),
               const SizedBox(width: 4),
               Expanded(
                 child: CustomButton(
-                  backgroundColor: context.neutral10,
-                  onTap: () => Navigator.of(context).pop(),
+                  backgroundColor: dialogContext.neutral10,
+                  onTap: () => Navigator.of(dialogContext).pop(),
                   text: 'Batal',
                 ),
               ),
