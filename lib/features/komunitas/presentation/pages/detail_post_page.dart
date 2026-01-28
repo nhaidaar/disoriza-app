@@ -36,6 +36,11 @@ class _DetailPostPageState extends State<DetailPostPage> {
 
   bool isLatest = false;
 
+  Worker? _postDeletedWorker;
+  Worker? _commentDeletedWorker;
+  Worker? _postReportedWorker;
+  Worker? _commentReportedWorker;
+
   /// Gets the current post from controller or falls back to widget.post.
   /// This ensures we always display the latest state.
   PostModel get currentPost {
@@ -70,28 +75,28 @@ class _DetailPostPageState extends State<DetailPostPage> {
     fetchComments();
     super.initState();
 
-    ever(komunitasController.postDeleted, (deleted) {
+    _postDeletedWorker = ever(komunitasController.postDeleted, (deleted) {
       if (deleted) {
         handlePostDeleted(context);
         komunitasController.postDeleted.value = false;
       }
     });
 
-    ever(komunitasController.commentDeleted, (deleted) {
+    _commentDeletedWorker = ever(komunitasController.commentDeleted, (deleted) {
       if (deleted) {
         handleCommentDeleted(context);
         komunitasController.commentDeleted.value = false;
       }
     });
 
-    ever(komunitasController.postReported, (reported) {
+    _postReportedWorker = ever(komunitasController.postReported, (reported) {
       if (reported) {
         handlePostReported(context);
         komunitasController.postReported.value = false;
       }
     });
 
-    ever(komunitasController.commentReported, (reported) {
+    _commentReportedWorker = ever(komunitasController.commentReported, (reported) {
       if (reported) {
         handleCommentReported(context);
         komunitasController.commentReported.value = false;
@@ -101,6 +106,10 @@ class _DetailPostPageState extends State<DetailPostPage> {
 
   @override
   void dispose() {
+    _postDeletedWorker?.dispose();
+    _commentDeletedWorker?.dispose();
+    _postReportedWorker?.dispose();
+    _commentReportedWorker?.dispose();
     commentTextController.dispose();
     super.dispose();
   }
